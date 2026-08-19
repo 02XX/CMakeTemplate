@@ -2,9 +2,9 @@ add_executable(smokeTests smoke.cpp)
 target_link_libraries(
     smokeTests
     PRIVATE
-{% for module in modules %}
+{%- for module in modules %}
         {{ project_name }}::{{ module }}
-{% endfor %}
+{%- endfor %}
         GTest::gtest_main
 )
 project_set_warnings(smokeTests)

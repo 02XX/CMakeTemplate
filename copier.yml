@@ -10,28 +10,57 @@ _skip_if_exists:
   - LICENSE
 
 _message_before_copy: |
-  正在用 CMakeTemplate 生成 C++ 工程。
-  请按提示填写项目信息；大部分问题都有合理默认值。
+  生成 C++ / CMake 工程。直接回车可用默认值。
 
 _message_after_copy: |
-  项目 "{{ project_name }}" 已生成到 {{ _copier_conf.dst_path }}。
+  已生成：{{ _copier_conf.dst_path }}
 
-  接下来：
-    1. cd "{{ _copier_conf.dst_path }}"
-    2. git init
-    {% if use_vcpkg %}3. 确认已安装 vcpkg，并设置环境变量 VCPKG_ROOT
-    4. 【必做】钉死依赖版本（用你本机的 vcpkg，不要跳过）：
-         vcpkg x-update-baseline --add-initial-baseline
-       然后把改过的 vcpkg.json 一并 git add / commit。
-       不跑这一步，各机器装到的包版本可能不一致。
-    5. cmake --workflow --preset <本机对应的 preset>
-    {% else %}3. cmake --workflow --preset <本机对应的 preset>
-    {% endif %}
-  可用 preset 见 CMakePresets.json。本地覆盖请新建 CMakeUserPresets.json（已被 gitignore）。
+    cd "{{ _copier_conf.dst_path }}"
+    git init
+    cmake --workflow --preset <preset>
+  {%- if use_vcpkg %}
+
+  vcpkg 清单由 _tasks 自动创建（看 VCPKG_ROOT，不要求在 PATH 里）。
+  需要 copier copy --trust。未加 --trust 时手动：
+    "$VCPKG_ROOT/vcpkg" new --name {{ project_slug | replace('_', '-') }} --version {{ version }}
+  {%- if enable_testing %}
+    "$VCPKG_ROOT/vcpkg" add port gtest
+  {%- endif %}
+  {%- endif %}
+
+  preset 列表见 CMakePresets.json；本地覆盖写 CMakeUserPresets.json。
 
 _message_after_update: |
-  项目 "{{ project_name }}" 已按模板更新。
-  如有合并冲突，请先解决再继续构建。
+  已更新 "{{ project_name }}"。有冲突先解决再构建。
+
+# 生成后自动执行（需要 copier copy --trust，且已设置 VCPKG_ROOT；不依赖 PATH）
+_tasks:
+  - command:
+      - "{{ _copier_python }}"
+      - "-c"
+      - |
+        import os, subprocess, sys
+        root = os.environ.get("VCPKG_ROOT")
+        if not root:
+            sys.exit("VCPKG_ROOT is not set")
+        exe = os.path.join(root, "vcpkg.exe" if os.name == "nt" else "vcpkg")
+        if not os.path.isfile(exe):
+            sys.exit("vcpkg not found: " + exe)
+        subprocess.check_call([exe, "new", "--name", "{{ project_slug | replace('_', '-') }}", "--version", "{{ version }}"])
+    when: "{{ use_vcpkg }}"
+  - command:
+      - "{{ _copier_python }}"
+      - "-c"
+      - |
+        import os, subprocess, sys
+        root = os.environ.get("VCPKG_ROOT")
+        if not root:
+            sys.exit("VCPKG_ROOT is not set")
+        exe = os.path.join(root, "vcpkg.exe" if os.name == "nt" else "vcpkg")
+        if not os.path.isfile(exe):
+            sys.exit("vcpkg not found: " + exe)
+        subprocess.check_call([exe, "add", "port", "gtest"])
+    when: "{{ use_vcpkg and enable_testing }}"
 
 # --- 问卷 ---
 
@@ -72,7 +101,7 @@ author_email:
 
 project_slug:
   type: str
-  help: 包名（vcpkg / 安装前缀用，小写）
+  help: vcpkg 包名（小写；公开头目录用工程名，例如 MEngine）
   default: "{{ project_name | lower }}"
   validator: >-
     {% if not (project_slug | regex_search('^[a-z][a-z0-9_]*$')) %}
@@ -81,7 +110,7 @@ project_slug:
 
 modules:
   type: yaml
-  help: 库模块列表。每个名字生成 include/<包名>/<Name>.hpp 与 src/<Name>/
+  help: 库模块列表。每个名字生成 include/<工程名>/<Name>.hpp 与 src/<Name>/
   default:
     - Core
   validator: >-
@@ -153,7 +182,7 @@ license:
 
 use_vcpkg:
   type: bool
-  help: 使用 vcpkg 清单模式管理依赖（与现有 CMake Presets 一致）
+  help: 启用 vcpkg（Presets/CI 接 toolchain；清单由生成后 vcpkg new 创建）
   default: true
 
 enable_testing:

@@ -4,9 +4,9 @@ target_compile_features({{ app }} PRIVATE "cxx_std_${CMAKE_CXX_STANDARD}")
 target_link_libraries(
     {{ app }}
     PRIVATE
-{% for module in modules %}
+{%- for module in modules %}
         {{ project_name }}::{{ module }}
-{% endfor %}
+{%- endfor %}
 )
 project_set_warnings({{ app }})
 project_enable_sanitizers({{ app }})

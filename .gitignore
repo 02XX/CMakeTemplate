@@ -4,6 +4,8 @@ Thumbs.db
 __pycache__/
 .venv/
 venv/
+.pytest_cache/
+uv.lock
 .idea/
 .vs/
 .vscode/

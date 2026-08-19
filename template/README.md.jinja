@@ -14,16 +14,15 @@
 - 依赖：vcpkg 清单模式（需要环境变量 `VCPKG_ROOT`）
 {% endif %}
 
-由 [CMakeTemplate](https://github.com/) Copier 模板生成。后续可用 `copier update` 同步模板更新。
+由 [CMakeTemplate](https://github.com/) Copier 模板生成，可用 `copier update` 升级。
 {% if use_vcpkg %}
 
-> **初始化后请立刻钉死 vcpkg 依赖版本**（用你本机的 `VCPKG_ROOT`，不要跳过）：
->
-> ```bash
-> vcpkg x-update-baseline --add-initial-baseline
-> ```
->
-> 这会把当前 vcpkg 提交写入 `vcpkg.json` 的 `builtin-baseline`。写完后提交该文件。不跑这一步，各机器可能装到不同版本。
+清单不随模板生成。用 `copier copy --trust` 时会按 `VCPKG_ROOT` 自动 `vcpkg new`。手动则：
+
+```bash
+"$VCPKG_ROOT/vcpkg" new --name {{ project_slug | replace('_', '-') }} --version {{ version }}
+{% if enable_testing %}"$VCPKG_ROOT/vcpkg" add port gtest
+{% endif %}```
 {% endif %}
 
 ## 依赖
@@ -79,13 +78,13 @@ cpack --preset windows-x64-msvc-vs2022-debug
 
 ## 目录
 
-公开头集中在 `include/{{ project_slug }}/`（安装后用法与 `find_package` 一致），实现按模块放在 `src/`，`apps/` 只放可执行入口。
+公开头集中在 `include/{{ project_name }}/`（与工程名一致，例如 `MEngine`；安装后用法与 `find_package` 一致），实现按模块放在 `src/`，`apps/` 只放可执行入口。
 
 ```
 .
 ├── CMakeLists.txt
 ├── cmake/
-├── include/{{ project_slug }}/
+├── include/{{ project_name }}/
 {% for module in modules %}│   └── {{ module }}.hpp
 {% endfor %}├── src/
 {% for module in modules %}│   └── {{ module }}/
@@ -95,14 +94,13 @@ cpack --preset windows-x64-msvc-vs2022-debug
 │   ├── Unit/
 {% for module in modules %}│   │   └── {{ module }}/
 {% endfor %}│   └── Integration/
-{% endif %}{% if use_vcpkg %}└── vcpkg.json
 {% endif %}```
 
 头文件：
 
 ```cpp
 {% for module in modules %}
-#include <{{ project_slug }}/{{ module }}.hpp>
+#include <{{ project_name }}/{{ module }}.hpp>
 {% endfor %}
 ```
 
@@ -112,7 +110,7 @@ CMake 目标：
 
 ## 新增库模块
 
-1. 新增 `include/{{ project_slug }}/新模块.hpp` 与 `src/新模块/`
+1. 新增 `include/{{ project_name }}/新模块.hpp` 与 `src/新模块/`
 2. 在 `src/CMakeLists.txt` 增加 `add_subdirectory(新模块)`
 3. 如需单测，复制 `tests/Unit/{{ modules[0] }}/` 并在 `tests/Unit/CMakeLists.txt` 增加 `add_subdirectory(新模块)`
 
@@ -125,39 +123,18 @@ CMake 目标：
 3. 按需修改该程序要链接的库模块
 {% if use_vcpkg %}
 
-## 依赖版本（vcpkg）
+## vcpkg
 
-`vcpkg.json` 只声明直接依赖，**没有预置 baseline**：模板不该替你钉死某个 registry 提交。
-
-第一次拿到项目后，用你自己的 vcpkg 生成 baseline 并提交：
+模板不预置清单。`copier copy --trust` 时按 `VCPKG_ROOT` 自动创建。手动：
 
 ```bash
-vcpkg x-update-baseline --add-initial-baseline
-```
+"$VCPKG_ROOT/vcpkg" new --name {{ project_slug | replace('_', '-') }} --version {{ version }}
+{% if enable_testing %}"$VCPKG_ROOT/vcpkg" add port gtest
+{% endif %}```
 
-这会往 `vcpkg.json` 写入 `builtin-baseline`（你本机 `VCPKG_ROOT` 的当前提交）。在此之前 vcpkg 会忽略版本信息，不同机器可能装到不同版本。
+会生成 `vcpkg.json` 与 `vcpkg-configuration.json`（含本机 registry baseline），一并提交。
 
-之后跟进官方 registry：
+之后：`"$VCPKG_ROOT/vcpkg" add port fmt`；`"$VCPKG_ROOT/vcpkg" x-update-baseline`。
 
-```bash
-vcpkg x-update-baseline
-```
-
-添加依赖：
-
-```bash
-vcpkg add port fmt
-```
-
-只钉死某一个包（忽略 baseline 里的版本）时，在 `vcpkg.json` 里加 `overrides`：
-
-```json
-{
-  "overrides": [
-    { "name": "gtest", "version": "1.16.0" }
-  ]
-}
-```
-
-CI 里克隆 vcpkg 用的是完整克隆，因为 `builtin-baseline` 指向的提交必须存在于本地 registry。
+CI 需完整克隆 vcpkg，否则可能找不到 configuration 里的 baseline 提交。
 {% endif %}

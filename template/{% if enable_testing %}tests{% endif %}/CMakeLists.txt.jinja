@@ -1,6 +1,6 @@
-{% if use_vcpkg %}
+{% if use_vcpkg -%}
 find_package(GTest CONFIG REQUIRED)
-{% else %}
+{% else -%}
 include(FetchContent)
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 set(INSTALL_GTEST OFF CACHE BOOL "" FORCE)
@@ -12,9 +12,7 @@ FetchContent_Declare(
     FIND_PACKAGE_ARGS CONFIG
 )
 FetchContent_MakeAvailable(googletest)
-{% endif %}
-
+{% endif -%}
 include(GoogleTest)
-
 add_subdirectory(Unit)
 add_subdirectory(Integration)

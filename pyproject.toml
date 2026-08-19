@@ -1,0 +1,19 @@
+[project]
+name = "cmake-template"
+version = "0.0.0"
+requires-python = ">=3.11"
+dependencies = []
+
+[dependency-groups]
+dev = [
+    "copier>=9.6",
+    "pytest>=8",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+filterwarnings = [
+    "ignore:Dirty template changes included automatically:UserWarning",
+    "ignore:.*invalid escape sequence:DeprecationWarning",
+]

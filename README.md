@@ -6,12 +6,12 @@
 
 - CMake 3.31+ 与 `CMakePresets.json`（Windows / Linux / macOS，MSVC / Clang / GCC）
 - 按目标平台拆分的 toolchain 文件
-- 可选 vcpkg 清单模式（`vcpkg.json`；baseline 由使用者生成后自行钉死）
+- 可选 vcpkg（Presets/CI 接 toolchain；`vcpkg.json` 由 `--trust` 后的 `_tasks` 通过 `VCPKG_ROOT` 调用 `vcpkg new` 创建）
 - clang-format / clang-tidy
-- 公开头在顶层 `include/<包名>/`，库实现在 `src/<模块>/`，程序入口在 `apps/<Name>/`
-- 头文件使用项目前缀：`#include <project/Module.hpp>`
+- `include/<工程名>/`、`src/<模块>/`、`apps/<Name>/`
+- `#include <MEngine/Module.hpp>`（vcpkg 名用小写 `project_slug`）
 - GoogleTest + CTest（`tests/Unit`、`tests/Integration`）
-- GitHub Actions CI（可选）
+- 可选 GitHub Actions CI
 
 ## 依赖
 
@@ -21,34 +21,18 @@
 - 编译器：MSVC、Clang 或 GCC
 - 若启用 vcpkg：安装 [vcpkg](https://vcpkg.io/) 并设置 `VCPKG_ROOT`
 
-安装 Copier：
-
 ```bash
-pipx install copier
+uvx copier copy --trust --vcs-ref HEAD ./CMakeTemplate ../MyApp
 ```
 
-## 生成项目
+`--trust` 才会跑 `_tasks`。启用 vcpkg 时任务用 `VCPKG_ROOT` 找可执行文件（不要求在 PATH 里），自动 `vcpkg new`，测试开启则再 `vcpkg add port gtest`。
+
+未加 `--trust` 时手动：
 
 ```bash
-copier copy <本仓库路径或 Git URL> <新项目路径>
+"$VCPKG_ROOT/vcpkg" new --name <project_slug> --version <version>
+"$VCPKG_ROOT/vcpkg" add port gtest
 ```
-
-本地仓库、尚未打 tag 时需要指定 `HEAD`：
-
-```bash
-copier copy --vcs-ref HEAD ./CMakeTemplate ../MyApp
-```
-
-按提示填写工程名、库模块、可执行程序等。大部分问题都有默认值。全部使用默认值可以加 `--defaults`。
-
-若生成时启用了 vcpkg，**进入新项目后先钉死 baseline**（用使用者本机的 vcpkg，模板不会预写提交哈希）：
-
-```bash
-cd <新项目路径>
-vcpkg x-update-baseline --add-initial-baseline
-```
-
-生成结束时 Copier 也会打印这一步。把改过的 `vcpkg.json` 提交进 git。
 
 ## 构建
 
@@ -77,6 +61,16 @@ copier update
 ```
 
 模板使用语义化 Git tag（`vX.Y.Z`）作为版本。请给本仓库打 tag，生成项目才能锁定并升级模板版本。
+
+## 测试模板
+
+```bash
+uv run --group dev pytest
+# 或
+uvx --with pytest --with copier pytest
+```
+
+会用 Copier `--trust` 生成临时项目并执行 `_tasks`（需要 `VCPKG_ROOT`），检查目录、`CMakeLists.txt`、Presets，以及 `cmake --list-presets`（本机有 CMake 时）。
 
 ## 仓库结构
 
