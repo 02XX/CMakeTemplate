@@ -71,6 +71,9 @@ Testing/
 # vcpkg
 vcpkg_installed/
 
+# Copier
+.copier-answers.yaml
+
 # IDE
 .vs/
 .idea/

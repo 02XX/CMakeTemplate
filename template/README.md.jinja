@@ -1,140 +1,64 @@
 # {{ project_name }}
 
 {{ project_description }}
-{% if author_name %}
-- 作者：{{ author_name }}{% if author_email %} ({{ author_email }}){% endif %}
-{% endif %}
-- 语言：C++{{ cxx_standard }}
-- 库模块：{% for module in modules %}{{ module }}{% if not loop.last %}, {% endif %}{% endfor %}
-- 可执行程序：{% for app in apps %}{{ app }}{% if not loop.last %}, {% endif %}{% endfor %}
-{% if enable_testing %}
-- 测试：GoogleTest + CTest
-{% endif %}
-{% if use_vcpkg %}
-- 依赖：vcpkg 清单模式（需要环境变量 `VCPKG_ROOT`）
-{% endif %}
-
-由 [CMakeTemplate](https://github.com/) Copier 模板生成，可用 `copier update` 升级。
-{% if use_vcpkg %}
-
-清单不随模板生成。用 `copier copy --trust` 时会按 `VCPKG_ROOT` 自动 `vcpkg new`。手动则：
-
-```bash
-"$VCPKG_ROOT/vcpkg" new --name {{ project_slug | replace('_', '-') }} --version {{ version }}
-{% if enable_testing %}"$VCPKG_ROOT/vcpkg" add port gtest
-{% endif %}```
-{% endif %}
-
-## 依赖
-
-- CMake 3.31+
-- 本机对应的编译器（MSVC / Clang / GCC）和生成器（Visual Studio / Ninja / Xcode / Unix Makefiles）
-{% if use_vcpkg %}
-- [vcpkg](https://vcpkg.io/)，并设置 `VCPKG_ROOT`
-{% endif %}
 
 ## 构建
 
-查看当前机器可用的 preset：
+CMake 3.31+{% if use_vcpkg %}，[vcpkg](https://vcpkg.io/)（`VCPKG_ROOT`）{% endif %}。
 
 ```bash
 cmake --list-presets
-```
-
-一次完成配置、编译、测试、打包：
-
-```bash
 cmake --workflow --preset windows-x64-msvc-vs2022-debug
-cmake --workflow --preset linux-x64-gcc-ninja-debug
-cmake --workflow --preset macos-arm64-clang-ninja-debug
 ```
 
-也可以分步执行：
+分步：`cmake --preset …` → `cmake --build --preset …`{% if enable_testing %} → `ctest --preset …`{% endif %} → `cpack --preset …`。
 
-```bash
-cmake --preset windows-x64-msvc-vs2022
-cmake --build --preset windows-x64-msvc-vs2022-debug
-ctest --preset windows-x64-msvc-vs2022-debug
-cpack --preset windows-x64-msvc-vs2022-debug
-```
+本机覆盖写 `CMakeUserPresets.json`（gitignore）。
 
-本地覆盖项写在 `CMakeUserPresets.json`（已被 gitignore）。例如打开 sanitizer：
-
-```json
-{
-  "version": 10,
-  "configurePresets": [
-    {
-      "name": "dev-asan",
-      "inherits": "windows-x64-clang-cl-ninja-debug",
-      "cacheVariables": {
-        "ENABLE_SANITIZER_ADDRESS": "ON",
-        "ENABLE_SANITIZER_UNDEFINED": "ON"
-      }
-    }
-  ]
-}
-```
-
-## 目录
-
-公开头集中在 `include/{{ project_name }}/`（与工程名一致，例如 `MEngine`；安装后用法与 `find_package` 一致），实现按模块放在 `src/`，`apps/` 只放可执行入口。
+## 结构
 
 ```
-.
-├── CMakeLists.txt
-├── cmake/
-├── include/{{ project_name }}/
-{% for module in modules %}│   └── {{ module }}.hpp
-{% endfor %}├── src/
-{% for module in modules %}│   └── {{ module }}/
-{% endfor %}├── apps/
-{% for app in apps %}│   └── {{ app }}/          # main.cpp
-{% endfor %}{% if enable_testing %}├── tests/
-│   ├── Unit/
-{% for module in modules %}│   │   └── {{ module }}/
-{% endfor %}│   └── Integration/
+include/{{ project_name }}/   # 公开头  #include <{{ project_name }}/{{ modules[0] }}.hpp>
+src/<模块>/                  # 实现
+apps/<程序>/                 # 入口
+{% if enable_testing %}tests/Unit/<模块>/         # 单测
+tests/Integration/           # 集成测试
 {% endif %}```
 
-头文件：
+加库：`include/{{ project_name }}/Foo.hpp`、`src/Foo/`，再在 `src/CMakeLists.txt` 里 `add_subdirectory(Foo)`{% if enable_testing %}；单测复制 `tests/Unit/{{ modules[0] }}/`{% endif %}。
 
-```cpp
-{% for module in modules %}
-#include <{{ project_name }}/{{ module }}.hpp>
-{% endfor %}
-```
-
-CMake 目标：
-- 库：{% for module in modules %}`{{ project_name }}::{{ module }}`{% if not loop.last %}、{% endif %}{% endfor %}
-- 程序：{% for app in apps %}`{{ project_name }}::{{ app }}`{% if not loop.last %}、{% endif %}{% endfor %}
-
-## 新增库模块
-
-1. 新增 `include/{{ project_name }}/新模块.hpp` 与 `src/新模块/`
-2. 在 `src/CMakeLists.txt` 增加 `add_subdirectory(新模块)`
-3. 如需单测，复制 `tests/Unit/{{ modules[0] }}/` 并在 `tests/Unit/CMakeLists.txt` 增加 `add_subdirectory(新模块)`
-
-## 新增可执行程序
-
-`apps/` 只放入口（`main.cpp` 以及只属于该程序的接线代码）。可复用逻辑放进 `src/` 的库模块。
-
-1. 复制 `apps/{{ apps[0] }}/` 并改名
-2. 在 `apps/CMakeLists.txt` 增加 `add_subdirectory(新程序名)`
-3. 按需修改该程序要链接的库模块
+加程序：复制 `apps/{{ apps[0] }}/`，在 `apps/CMakeLists.txt` 里 `add_subdirectory`。
 {% if use_vcpkg %}
 
-## vcpkg
-
-模板不预置清单。`copier copy --trust` 时按 `VCPKG_ROOT` 自动创建。手动：
+## 依赖
 
 ```bash
-"$VCPKG_ROOT/vcpkg" new --name {{ project_slug | replace('_', '-') }} --version {{ version }}
-{% if enable_testing %}"$VCPKG_ROOT/vcpkg" add port gtest
-{% endif %}```
+"$VCPKG_ROOT/vcpkg" add port fmt
+"$VCPKG_ROOT/vcpkg" x-update-baseline
+```
 
-会生成 `vcpkg.json` 与 `vcpkg-configuration.json`（含本机 registry baseline），一并提交。
+`vcpkg.json` / `vcpkg-configuration.json` 进 git。CI 需要完整克隆 vcpkg，浅克隆可能对不上 baseline。
+{% endif %}
+{% if license != 'none' %}
+{% if license == 'mit' %}
+## 许可
 
-之后：`"$VCPKG_ROOT/vcpkg" add port fmt`；`"$VCPKG_ROOT/vcpkg" x-update-baseline`。
+MIT。见 `LICENSE`。
+{% elif license == 'apache-2.0' %}
+## 许可
 
-CI 需完整克隆 vcpkg，否则可能找不到 configuration 里的 baseline 提交。
+Apache-2.0。见 `LICENSE`。
+{% elif license == 'bsd-3-clause' %}
+## 许可
+
+BSD-3-Clause。见 `LICENSE`。
+{% elif license == 'gpl-3.0' %}
+## 许可
+
+GPL-3.0。见 `LICENSE`。
+{% elif license == 'unlicense' %}
+## 许可
+
+Unlicense。见 `LICENSE`。
+{% endif %}
 {% endif %}
