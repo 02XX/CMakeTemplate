@@ -1,0 +1,13 @@
+add_executable({{ app }} main.cpp)
+add_executable({{ project_name }}::{{ app }} ALIAS {{ app }})
+target_compile_features({{ app }} PRIVATE "cxx_std_${CMAKE_CXX_STANDARD}")
+target_link_libraries(
+    {{ app }}
+    PRIVATE
+{% for module in modules %}
+        {{ project_name }}::{{ module }}
+{% endfor %}
+)
+project_set_warnings({{ app }})
+project_enable_sanitizers({{ app }})
+set_target_properties({{ app }} PROPERTIES EXPORT_NAME "{{ app }}")

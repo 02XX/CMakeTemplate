@@ -1,0 +1,8 @@
+{
+    "name": "{{ project_slug | replace('_', '-') }}",
+    "version": "{{ version }}",
+    "description": "{{ project_description | replace('\\', '\\\\') | replace('"', '\\"') }}",
+    "dependencies": [{% if enable_testing %}
+        "gtest"
+    {% endif %}]
+}

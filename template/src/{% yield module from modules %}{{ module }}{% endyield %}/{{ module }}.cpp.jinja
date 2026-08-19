@@ -1,0 +1,14 @@
+#include <{{ project_slug }}/{{ module }}.hpp>
+
+#include <string>
+#include <string_view>
+
+namespace {{ namespace }}::{{ module }}
+{
+
+std::string greet(std::string_view name)
+{
+    return "Hello from {{ module }}, " + std::string(name) + "!";
+}
+
+} // namespace {{ namespace }}::{{ module }}

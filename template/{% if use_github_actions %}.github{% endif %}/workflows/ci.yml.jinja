@@ -1,0 +1,55 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+concurrency:
+  group: ${{ '{{' }} github.workflow {{ '}}' }}-${{ '{{' }} github.ref {{ '}}' }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: ${{ '{{' }} matrix.name {{ '}}' }}
+    runs-on: ${{ '{{' }} matrix.os {{ '}}' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Windows MSVC
+            os: windows-latest
+            preset: windows-x64-msvc-vs2022-debug
+          - name: Linux GCC
+            os: ubuntu-latest
+            preset: linux-x64-gcc-ninja-debug
+          - name: macOS Clang
+            os: macos-latest
+            preset: macos-arm64-clang-ninja-debug
+{% if use_vcpkg %}
+    env:
+      VCPKG_ROOT: ${{ '{{' }} github.workspace {{ '}}' }}/vcpkg
+{% endif %}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: lukka/get-cmake@latest
+
+{% if use_vcpkg %}
+      # 完整克隆：builtin-baseline 指向的提交必须存在于本地 registry
+      - name: Install vcpkg
+        run: git clone https://github.com/microsoft/vcpkg.git "${{ '{{' }} env.VCPKG_ROOT {{ '}}' }}"
+
+      - name: Bootstrap vcpkg
+        run: |
+          if [ "${{ '{{' }} runner.os {{ '}}' }}" = "Windows" ]; then
+            "${VCPKG_ROOT}/bootstrap-vcpkg.bat" -disableMetrics
+          else
+            "${VCPKG_ROOT}/bootstrap-vcpkg.sh" -disableMetrics
+          fi
+        shell: bash
+{% endif %}
+
+      - name: Configure, build, test, and package
+        run: cmake --workflow --preset ${{ '{{' }} matrix.preset {{ '}}' }}

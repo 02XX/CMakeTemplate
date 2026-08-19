@@ -1,0 +1,9 @@
+#include <{{ project_slug }}/{{ modules[0] }}.hpp>
+
+#include <iostream>
+
+int main()
+{
+    std::cout << {{ namespace }}::{{ modules[0] }}::greet("{{ app }}") << '\n';
+    return 0;
+}

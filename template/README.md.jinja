@@ -1,0 +1,163 @@
+# {{ project_name }}
+
+{{ project_description }}
+{% if author_name %}
+- 作者：{{ author_name }}{% if author_email %} ({{ author_email }}){% endif %}
+{% endif %}
+- 语言：C++{{ cxx_standard }}
+- 库模块：{% for module in modules %}{{ module }}{% if not loop.last %}, {% endif %}{% endfor %}
+- 可执行程序：{% for app in apps %}{{ app }}{% if not loop.last %}, {% endif %}{% endfor %}
+{% if enable_testing %}
+- 测试：GoogleTest + CTest
+{% endif %}
+{% if use_vcpkg %}
+- 依赖：vcpkg 清单模式（需要环境变量 `VCPKG_ROOT`）
+{% endif %}
+
+由 [CMakeTemplate](https://github.com/) Copier 模板生成。后续可用 `copier update` 同步模板更新。
+{% if use_vcpkg %}
+
+> **初始化后请立刻钉死 vcpkg 依赖版本**（用你本机的 `VCPKG_ROOT`，不要跳过）：
+>
+> ```bash
+> vcpkg x-update-baseline --add-initial-baseline
+> ```
+>
+> 这会把当前 vcpkg 提交写入 `vcpkg.json` 的 `builtin-baseline`。写完后提交该文件。不跑这一步，各机器可能装到不同版本。
+{% endif %}
+
+## 依赖
+
+- CMake 3.31+
+- 本机对应的编译器（MSVC / Clang / GCC）和生成器（Visual Studio / Ninja / Xcode / Unix Makefiles）
+{% if use_vcpkg %}
+- [vcpkg](https://vcpkg.io/)，并设置 `VCPKG_ROOT`
+{% endif %}
+
+## 构建
+
+查看当前机器可用的 preset：
+
+```bash
+cmake --list-presets
+```
+
+一次完成配置、编译、测试、打包：
+
+```bash
+cmake --workflow --preset windows-x64-msvc-vs2022-debug
+cmake --workflow --preset linux-x64-gcc-ninja-debug
+cmake --workflow --preset macos-arm64-clang-ninja-debug
+```
+
+也可以分步执行：
+
+```bash
+cmake --preset windows-x64-msvc-vs2022
+cmake --build --preset windows-x64-msvc-vs2022-debug
+ctest --preset windows-x64-msvc-vs2022-debug
+cpack --preset windows-x64-msvc-vs2022-debug
+```
+
+本地覆盖项写在 `CMakeUserPresets.json`（已被 gitignore）。例如打开 sanitizer：
+
+```json
+{
+  "version": 10,
+  "configurePresets": [
+    {
+      "name": "dev-asan",
+      "inherits": "windows-x64-clang-cl-ninja-debug",
+      "cacheVariables": {
+        "ENABLE_SANITIZER_ADDRESS": "ON",
+        "ENABLE_SANITIZER_UNDEFINED": "ON"
+      }
+    }
+  ]
+}
+```
+
+## 目录
+
+公开头集中在 `include/{{ project_slug }}/`（安装后用法与 `find_package` 一致），实现按模块放在 `src/`，`apps/` 只放可执行入口。
+
+```
+.
+├── CMakeLists.txt
+├── cmake/
+├── include/{{ project_slug }}/
+{% for module in modules %}│   └── {{ module }}.hpp
+{% endfor %}├── src/
+{% for module in modules %}│   └── {{ module }}/
+{% endfor %}├── apps/
+{% for app in apps %}│   └── {{ app }}/          # main.cpp
+{% endfor %}{% if enable_testing %}├── tests/
+│   ├── Unit/
+{% for module in modules %}│   │   └── {{ module }}/
+{% endfor %}│   └── Integration/
+{% endif %}{% if use_vcpkg %}└── vcpkg.json
+{% endif %}```
+
+头文件：
+
+```cpp
+{% for module in modules %}
+#include <{{ project_slug }}/{{ module }}.hpp>
+{% endfor %}
+```
+
+CMake 目标：
+- 库：{% for module in modules %}`{{ project_name }}::{{ module }}`{% if not loop.last %}、{% endif %}{% endfor %}
+- 程序：{% for app in apps %}`{{ project_name }}::{{ app }}`{% if not loop.last %}、{% endif %}{% endfor %}
+
+## 新增库模块
+
+1. 新增 `include/{{ project_slug }}/新模块.hpp` 与 `src/新模块/`
+2. 在 `src/CMakeLists.txt` 增加 `add_subdirectory(新模块)`
+3. 如需单测，复制 `tests/Unit/{{ modules[0] }}/` 并在 `tests/Unit/CMakeLists.txt` 增加 `add_subdirectory(新模块)`
+
+## 新增可执行程序
+
+`apps/` 只放入口（`main.cpp` 以及只属于该程序的接线代码）。可复用逻辑放进 `src/` 的库模块。
+
+1. 复制 `apps/{{ apps[0] }}/` 并改名
+2. 在 `apps/CMakeLists.txt` 增加 `add_subdirectory(新程序名)`
+3. 按需修改该程序要链接的库模块
+{% if use_vcpkg %}
+
+## 依赖版本（vcpkg）
+
+`vcpkg.json` 只声明直接依赖，**没有预置 baseline**：模板不该替你钉死某个 registry 提交。
+
+第一次拿到项目后，用你自己的 vcpkg 生成 baseline 并提交：
+
+```bash
+vcpkg x-update-baseline --add-initial-baseline
+```
+
+这会往 `vcpkg.json` 写入 `builtin-baseline`（你本机 `VCPKG_ROOT` 的当前提交）。在此之前 vcpkg 会忽略版本信息，不同机器可能装到不同版本。
+
+之后跟进官方 registry：
+
+```bash
+vcpkg x-update-baseline
+```
+
+添加依赖：
+
+```bash
+vcpkg add port fmt
+```
+
+只钉死某一个包（忽略 baseline 里的版本）时，在 `vcpkg.json` 里加 `overrides`：
+
+```json
+{
+  "overrides": [
+    { "name": "gtest", "version": "1.16.0" }
+  ]
+}
+```
+
+CI 里克隆 vcpkg 用的是完整克隆，因为 `builtin-baseline` 指向的提交必须存在于本地 registry。
+{% endif %}

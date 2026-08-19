@@ -1,0 +1,11 @@
+{% for module in modules %}
+#include <{{ project_slug }}/{{ module }}.hpp>
+{% endfor %}
+#include <gtest/gtest.h>
+
+TEST(Smoke, AllModulesLink)
+{
+{% for module in modules %}
+    EXPECT_FALSE({{ namespace }}::{{ module }}::greet().empty());
+{% endfor %}
+}

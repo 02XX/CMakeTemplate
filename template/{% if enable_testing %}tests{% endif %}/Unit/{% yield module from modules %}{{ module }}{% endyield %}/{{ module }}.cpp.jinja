@@ -1,0 +1,11 @@
+#include <{{ project_slug }}/{{ module }}.hpp>
+
+#include <gtest/gtest.h>
+
+#include <string>
+
+TEST({{ module }}, GreetContainsName)
+{
+    const std::string greeting = {{ namespace }}::{{ module }}::greet("Ada");
+    EXPECT_NE(greeting.find("Ada"), std::string::npos);
+}

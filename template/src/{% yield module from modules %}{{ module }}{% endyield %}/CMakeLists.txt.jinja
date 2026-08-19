@@ -1,0 +1,15 @@
+add_library({{ project_name }}_{{ module }})
+add_library({{ project_name }}::{{ module }} ALIAS {{ project_name }}_{{ module }})
+target_compile_features({{ project_name }}_{{ module }} PUBLIC "cxx_std_${CMAKE_CXX_STANDARD}")
+target_sources(
+    {{ project_name }}_{{ module }}
+    PRIVATE
+        {{ module }}.cpp
+    PUBLIC
+        FILE_SET HEADERS
+        BASE_DIRS "${PROJECT_SOURCE_DIR}/include"
+        FILES "${PROJECT_SOURCE_DIR}/include/{{ project_slug }}/{{ module }}.hpp"
+)
+project_set_warnings({{ project_name }}_{{ module }})
+project_enable_sanitizers({{ project_name }}_{{ module }})
+set_target_properties({{ project_name }}_{{ module }} PROPERTIES EXPORT_NAME "{{ module }}")

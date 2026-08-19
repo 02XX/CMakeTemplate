@@ -1,0 +1,23 @@
+add_executable(
+    {{ module }}Tests
+    {{ module }}.cpp
+)
+target_link_libraries(
+    {{ module }}Tests
+    PRIVATE
+        {{ project_name }}::{{ module }}
+        GTest::gtest_main
+)
+project_set_warnings({{ module }}Tests)
+project_enable_sanitizers({{ module }}Tests)
+gtest_discover_tests({{ module }}Tests)
+
+target_link_libraries(
+    {{ module }}Tests
+    PRIVATE
+        {{ project_name }}::{{ module }}
+        GTest::gtest_main
+)
+project_set_warnings({{ module }}Tests)
+project_enable_sanitizers({{ module }}Tests)
+gtest_discover_tests({{ module }}Tests)

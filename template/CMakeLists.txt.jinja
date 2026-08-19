@@ -1,0 +1,94 @@
+cmake_minimum_required(VERSION 3.31)
+
+project(
+    {{ project_name }}
+    VERSION {{ version }}
+    DESCRIPTION "{{ project_description | replace('\\', '\\\\') | replace('"', '\\"') }}"
+    LANGUAGES CXX
+)
+
+include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/PreventInSourceBuilds.cmake")
+include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/CompilerWarnings.cmake")
+include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/Sanitizers.cmake")
+
+set(CMAKE_CXX_STANDARD {{ cxx_standard }})
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_OPTIMIZE_DEPENDENCIES ON)
+set(CMAKE_COLOR_DIAGNOSTICS ON)
+set(CMAKE_COMPILE_WARNING_AS_ERROR {{ 'ON' if warnings_as_errors else 'OFF' }})
+
+option(ENABLE_SANITIZER_ADDRESS "Enable address sanitizer" OFF)
+option(ENABLE_SANITIZER_UNDEFINED "Enable undefined-behavior sanitizer" OFF)
+option(ENABLE_SANITIZER_LEAK "Enable leak sanitizer" OFF)
+option(ENABLE_SANITIZER_THREAD "Enable thread sanitizer" OFF)
+
+add_subdirectory(src)
+add_subdirectory(apps)
+
+include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
+
+install(
+    TARGETS
+{% for module in modules %}
+        {{ project_name }}_{{ module }}
+{% endfor %}
+{% for app in apps %}
+        {{ app }}
+{% endfor %}
+    EXPORT {{ project_name }}Targets
+    RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
+    LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+    ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+    FILE_SET HEADERS DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
+)
+
+install(
+    EXPORT {{ project_name }}Targets
+    FILE {{ project_name }}Targets.cmake
+    NAMESPACE {{ project_name }}::
+    DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/{{ project_name }}"
+)
+
+configure_package_config_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Config.cmake.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/{{ project_name }}Config.cmake"
+    INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/{{ project_name }}"
+)
+
+write_basic_package_version_file(
+    "${CMAKE_CURRENT_BINARY_DIR}/{{ project_name }}ConfigVersion.cmake"
+    VERSION "${PROJECT_VERSION}"
+    COMPATIBILITY SameMajorVersion
+)
+
+install(
+    FILES
+        "${CMAKE_CURRENT_BINARY_DIR}/{{ project_name }}Config.cmake"
+        "${CMAKE_CURRENT_BINARY_DIR}/{{ project_name }}ConfigVersion.cmake"
+    DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/{{ project_name }}"
+)
+
+{% if enable_testing %}
+if(PROJECT_IS_TOP_LEVEL)
+    include(CTest)
+    if(BUILD_TESTING)
+        add_subdirectory(tests)
+    endif()
+endif()
+{% endif %}
+
+set(CPACK_PACKAGE_NAME "{{ project_name }}")
+set(CPACK_PACKAGE_VENDOR "{% if author_name %}{{ author_name }}{% else %}${PROJECT_NAME}{% endif %}")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "${PROJECT_DESCRIPTION}")
+set(CPACK_PACKAGE_VERSION "${PROJECT_VERSION}")
+{% if license != 'none' %}
+set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
+{% endif %}
+set(CPACK_GENERATOR "TGZ")
+if(WIN32)
+    set(CPACK_GENERATOR "ZIP")
+endif()
+include(CPack)

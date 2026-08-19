@@ -1,0 +1,172 @@
+_min_copier_version: "9.6.0"
+_subdirectory: template
+_templates_suffix: .jinja
+_answers_file: .copier-answers.yaml
+_envops:
+  keep_trailing_newline: true
+
+_skip_if_exists:
+  - CHANGELOG.md
+  - LICENSE
+
+_message_before_copy: |
+  正在用 CMakeTemplate 生成 C++ 工程。
+  请按提示填写项目信息；大部分问题都有合理默认值。
+
+_message_after_copy: |
+  项目 "{{ project_name }}" 已生成到 {{ _copier_conf.dst_path }}。
+
+  接下来：
+    1. cd "{{ _copier_conf.dst_path }}"
+    2. git init
+    {% if use_vcpkg %}3. 确认已安装 vcpkg，并设置环境变量 VCPKG_ROOT
+    4. 【必做】钉死依赖版本（用你本机的 vcpkg，不要跳过）：
+         vcpkg x-update-baseline --add-initial-baseline
+       然后把改过的 vcpkg.json 一并 git add / commit。
+       不跑这一步，各机器装到的包版本可能不一致。
+    5. cmake --workflow --preset <本机对应的 preset>
+    {% else %}3. cmake --workflow --preset <本机对应的 preset>
+    {% endif %}
+  可用 preset 见 CMakePresets.json。本地覆盖请新建 CMakeUserPresets.json（已被 gitignore）。
+
+_message_after_update: |
+  项目 "{{ project_name }}" 已按模板更新。
+  如有合并冲突，请先解决再继续构建。
+
+# --- 问卷 ---
+
+project_name:
+  type: str
+  help: CMake 工程名称（project() / 目标名，字母开头，只能含字母、数字、下划线）
+  default: "{{ _folder_name | regex_replace('[^A-Za-z0-9_]', '_') }}"
+  validator: >-
+    {% if not project_name %}
+    工程名称不能为空
+    {% elif not (project_name | regex_search('^[A-Za-z_][A-Za-z0-9_]*$')) %}
+    必须是合法 CMake 标识符：字母或下划线开头，只含字母、数字、下划线
+    {% endif %}
+
+project_description:
+  type: str
+  help: 项目简介
+  default: "A modern C++ project"
+
+version:
+  type: str
+  help: 初始语义化版本号
+  default: "0.1.0"
+  validator: >-
+    {% if not (version | regex_search('^[0-9]+\.[0-9]+\.[0-9]+([.-][A-Za-z0-9]+)*$')) %}
+    版本号格式应为 MAJOR.MINOR.PATCH，例如 0.1.0
+    {% endif %}
+
+author_name:
+  type: str
+  help: 作者姓名
+  default: ""
+
+author_email:
+  type: str
+  help: 作者邮箱
+  default: ""
+
+project_slug:
+  type: str
+  help: 包名（vcpkg / 安装前缀用，小写）
+  default: "{{ project_name | lower }}"
+  validator: >-
+    {% if not (project_slug | regex_search('^[a-z][a-z0-9_]*$')) %}
+    只能使用小写字母、数字、下划线，且必须以字母开头
+    {% endif %}
+
+modules:
+  type: yaml
+  help: 库模块列表。每个名字生成 include/<包名>/<Name>.hpp 与 src/<Name>/
+  default:
+    - Core
+  validator: >-
+    {% if modules is string or modules is mapping %}
+    请使用 YAML 列表，例如
+    - Core
+    - Net
+    {% elif not modules %}
+    至少需要一个模块
+    {% else %}
+    {% for module in modules %}
+    {% if not (module | string | regex_search('^[A-Za-z_][A-Za-z0-9_]*$')) %}
+    模块名 '{{ module }}' 必须是合法标识符（字母或下划线开头，只含字母、数字、下划线）
+    {% endif %}
+    {% endfor %}
+    {% endif %}
+
+apps:
+  type: yaml
+  help: 可执行程序列表。每个名字生成 apps/<Name>/main.cpp（入口），默认链接全部库模块
+  default:
+    - "{{ project_name }}"
+  validator: >-
+    {% if apps is string or apps is mapping %}
+    请使用 YAML 列表，例如
+    - {{ project_name }}
+    {% elif not apps %}
+    至少需要一个可执行程序
+    {% else %}
+    {% for app in apps %}
+    {% if not (app | string | regex_search('^[A-Za-z_][A-Za-z0-9_]*$')) %}
+    可执行程序名 '{{ app }}' 必须是合法标识符（字母或下划线开头，只含字母、数字、下划线）
+    {% endif %}
+    {% if app in modules %}
+    可执行程序 '{{ app }}' 与库模块重名
+    {% endif %}
+    {% endfor %}
+    {% endif %}
+
+namespace:
+  type: str
+  help: C++ 命名空间
+  default: "{{ project_slug }}"
+  validator: >-
+    {% if not (namespace | regex_search('^[A-Za-z_][A-Za-z0-9_]*$')) %}
+    必须是合法 C++ 标识符
+    {% endif %}
+
+cxx_standard:
+  type: str
+  help: C++ 标准
+  choices:
+    - "17"
+    - "20"
+    - "23"
+  default: "23"
+
+license:
+  type: str
+  help: 开源许可证
+  choices:
+    MIT: mit
+    Apache-2.0: apache-2.0
+    BSD-3-Clause: bsd-3-clause
+    GNU GPLv3: gpl-3.0
+    Unlicense: unlicense
+    不生成 LICENSE: none
+  default: mit
+
+use_vcpkg:
+  type: bool
+  help: 使用 vcpkg 清单模式管理依赖（与现有 CMake Presets 一致）
+  default: true
+
+enable_testing:
+  type: bool
+  help: 生成 GoogleTest 测试与 CTest
+  default: true
+
+use_github_actions:
+  type: bool
+  help: 生成 GitHub Actions CI 工作流
+  default: true
+
+warnings_as_errors:
+  type: bool
+  help: 默认将编译器警告视为错误
+  default: false

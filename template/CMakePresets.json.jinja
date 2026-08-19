@@ -1,0 +1,2610 @@
+{
+    "version": 10,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 31,
+        "patch": 0
+    },
+    "configurePresets": [
+        {
+            "name": "base",
+            "description": "Common output directories, diagnostics, and cache settings",
+            "hidden": true,
+            "binaryDir": "${sourceDir}/build/${presetName}",
+            "installDir": "${sourceDir}/install/${presetName}",
+            "graphviz": "dependencies.dot",
+            "cacheVariables": {
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+            }
+        },
+{% if use_vcpkg %}
+        {
+            "name": "vcpkg",
+            "description": "Use vcpkg manifest mode as the primary package toolchain",
+            "hidden": true,
+            "toolchainFile": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
+        },
+{% endif %}
+        {
+            "name": "windows",
+            "displayName": "Windows",
+            "hidden": true,
+            "inherits": [
+                "base"{% if use_vcpkg %},
+                "vcpkg"{% endif %}
+            ],
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Windows"
+            },
+            "description": "Common Windows configuration{% if use_vcpkg %} with vcpkg enabled by default{% endif %}"
+        },
+        {
+            "name": "linux",
+            "displayName": "Linux",
+            "hidden": true,
+            "inherits": [
+                "base"{% if use_vcpkg %},
+                "vcpkg"{% endif %}
+            ],
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Linux"
+            },
+            "description": "Common Linux configuration{% if use_vcpkg %} with vcpkg enabled by default{% endif %}"
+        },
+        {
+            "name": "macos",
+            "displayName": "macOS",
+            "hidden": true,
+            "inherits": [
+                "base"{% if use_vcpkg %},
+                "vcpkg"{% endif %}
+            ],
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Darwin"
+            },
+            "description": "Common macOS configuration{% if use_vcpkg %} with vcpkg enabled by default{% endif %}"
+        },
+        {
+            "name": "windows-x64-msvc-vs2022",
+            "displayName": "Windows x64 MSVC Visual Studio 2022",
+            "inherits": [
+                "windows"
+            ],
+            "generator": "Visual Studio 17 2022",
+            "architecture": {
+                "value": "x64",
+                "strategy": "set"
+            },
+            "cacheVariables": {
+                {% if use_vcpkg %}
+                "VCPKG_TARGET_TRIPLET": "x64-windows",
+                "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/windows-x64-msvc.cmake"
+{%- else %}
+                "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/windows-x64-msvc.cmake"
+{%- endif %}
+            },
+            "description": "Configure Windows x64 MSVC Visual Studio 2022 using {% if use_vcpkg %}vcpkg and {% endif %}the selected target toolchain"
+        },
+        {
+            "name": "windows-x64-clang-cl-ninja-debug",
+            "displayName": "Windows x64 Clang-CL Ninja Debug",
+            "inherits": [
+                "windows"
+            ],
+            "generator": "Ninja",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                {% if use_vcpkg %}
+                "VCPKG_TARGET_TRIPLET": "x64-windows",
+                "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/windows-x64-clang-cl.cmake"
+{%- else %}
+                "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/windows-x64-clang-cl.cmake"
+{%- endif %}
+            },
+            "description": "Configure Windows x64 Clang-CL Ninja Debug using {% if use_vcpkg %}vcpkg and {% endif %}the selected target toolchain"
+        },
+        {
+            "name": "windows-x64-clang-cl-ninja-release",
+            "displayName": "Windows x64 Clang-CL Ninja Release",
+            "inherits": [
+                "windows"
+            ],
+            "generator": "Ninja",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                {% if use_vcpkg %}
+                "VCPKG_TARGET_TRIPLET": "x64-windows",
+                "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/windows-x64-clang-cl.cmake"
+{%- else %}
+                "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/windows-x64-clang-cl.cmake"
+{%- endif %}
+            },
+            "description": "Configure Windows x64 Clang-CL Ninja Release using {% if use_vcpkg %}vcpkg and {% endif %}the selected target toolchain"
+        },
+        {
+            "name": "windows-x64-clang-ninja-debug",
+            "displayName": "Windows x64 Clang Ninja Debug",
+            "inherits": [
+                "windows"
+            ],
+            "generator": "Ninja",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                {% if use_vcpkg %}
+                "VCPKG_TARGET_TRIPLET": "x64-windows",
+                "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/windows-x64-clang.cmake"
+{%- else %}
+                "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/windows-x64-clang.cmake"
+{%- endif %}
+            },
+            "description": "Configure Windows x64 Clang Ninja Debug using {% if use_vcpkg %}vcpkg and {% endif %}the selected target toolchain"
+        },
+        {
+            "name": "windows-x64-clang-ninja-release",
+            "displayName": "Windows x64 Clang Ninja Release",
+            "inherits": [
+                "windows"
+            ],
+            "generator": "Ninja",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                {% if use_vcpkg %}
+                "VCPKG_TARGET_TRIPLET": "x64-windows",
+                "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/windows-x64-clang.cmake"
+{%- else %}
+                "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/windows-x64-clang.cmake"
+{%- endif %}
+            },
+            "description": "Configure Windows x64 Clang Ninja Release using {% if use_vcpkg %}vcpkg and {% endif %}the selected target toolchain"
+        },
+        {
+            "name": "windows-arm64-msvc-vs2022",
+            "displayName": "Windows ARM64 MSVC Visual Studio 2022",
+            "inherits": [
+                "windows"
+            ],
+            "generator": "Visual Studio 17 2022",
+            "architecture": {
+                "value": "arm64",
+                "strategy": "set"
+            },
+            "cacheVariables": {
+                {% if use_vcpkg %}
+                "VCPKG_TARGET_TRIPLET": "arm64-windows",
+                "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/windows-arm64-msvc.cmake"
+{%- else %}
+                "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/windows-arm64-msvc.cmake"
+{%- endif %}
+            },
+            "description": "Configure Windows ARM64 MSVC Visual Studio 2022 using {% if use_vcpkg %}vcpkg and {% endif %}the selected target toolchain"
+        },
+        {
+            "name": "windows-arm64-clang-cl-ninja-debug",
+            "displayName": "Windows ARM64 Clang-CL Ninja Debug",
+            "inherits": [
+                "windows"
+            ],
+            "generator": "Ninja",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                {% if use_vcpkg %}
+                "VCPKG_TARGET_TRIPLET": "arm64-windows",
+                "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/windows-arm64-clang-cl.cmake"
+{%- else %}
+                "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/windows-arm64-clang-cl.cmake"
+{%- endif %}
+            },
+            "description": "Configure Windows ARM64 Clang-CL Ninja Debug using {% if use_vcpkg %}vcpkg and {% endif %}the selected target toolchain"
+        },
+        {
+            "name": "windows-arm64-clang-cl-ninja-release",
+            "displayName": "Windows ARM64 Clang-CL Ninja Release",
+            "inherits": [
+                "windows"
+            ],
+            "generator": "Ninja",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                {% if use_vcpkg %}
+                "VCPKG_TARGET_TRIPLET": "arm64-windows",
+                "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/windows-arm64-clang-cl.cmake"
+{%- else %}
+                "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/windows-arm64-clang-cl.cmake"
+{%- endif %}
+            },
+            "description": "Configure Windows ARM64 Clang-CL Ninja Release using {% if use_vcpkg %}vcpkg and {% endif %}the selected target toolchain"
+        },
+        {
+            "name": "windows-arm64-clang-ninja-debug",
+            "displayName": "Windows ARM64 Clang Ninja Debug",
+            "inherits": [
+                "windows"
+            ],
+            "generator": "Ninja",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                {% if use_vcpkg %}
+                "VCPKG_TARGET_TRIPLET": "arm64-windows",
+                "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/windows-arm64-clang.cmake"
+{%- else %}
+                "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/windows-arm64-clang.cmake"
+{%- endif %}
+            },
+            "description": "Configure Windows ARM64 Clang Ninja Debug using {% if use_vcpkg %}vcpkg and {% endif %}the selected target toolchain"
+        },
+        {
+            "name": "windows-arm64-clang-ninja-release",
+            "displayName": "Windows ARM64 Clang Ninja Release",
+            "inherits": [
+                "windows"
+            ],
+            "generator": "Ninja",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                {% if use_vcpkg %}
+                "VCPKG_TARGET_TRIPLET": "arm64-windows",
+                "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/windows-arm64-clang.cmake"
+{%- else %}
+                "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/windows-arm64-clang.cmake"
+{%- endif %}
+            },
+            "description": "Configure Windows ARM64 Clang Ninja Release using {% if use_vcpkg %}vcpkg and {% endif %}the selected target toolchain"
+        },
+        {
+            "name": "linux-x64-gcc-ninja-debug",
+            "displayName": "Linux x64 GCC Ninja Debug",
+            "inherits": [
+                "linux"
+            ],
+            "generator": "Ninja",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                {% if use_vcpkg %}
+                "VCPKG_TARGET_TRIPLET": "x64-linux",
+                "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/linux-x64-gcc.cmake"
+{%- else %}
+                "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/linux-x64-gcc.cmake"
+{%- endif %}
+            },
+            "description": "Configure Linux x64 GCC Ninja Debug using {% if use_vcpkg %}vcpkg and {% endif %}the selected target toolchain"
+        },
+        {
+            "name": "linux-x64-gcc-ninja-release",
+            "displayName": "Linux x64 GCC Ninja Release",
+            "inherits": [
+                "linux"
+            ],
+            "generator": "Ninja",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                {% if use_vcpkg %}
+                "VCPKG_TARGET_TRIPLET": "x64-linux",
+                "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/linux-x64-gcc.cmake"
+{%- else %}
+                "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/linux-x64-gcc.cmake"
+{%- endif %}
+            },
+            "description": "Configure Linux x64 GCC Ninja Release using {% if use_vcpkg %}vcpkg and {% endif %}the selected target toolchain"
+        },
+        {
+            "name": "linux-x64-gcc-make-debug",
+            "displayName": "Linux x64 GCC Unix Makefiles Debug",
+            "inherits": [
+                "linux"
+            ],
+            "generator": "Unix Makefiles",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                {% if use_vcpkg %}
+                "VCPKG_TARGET_TRIPLET": "x64-linux",
+                "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/linux-x64-gcc.cmake"
+{%- else %}
+                "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/linux-x64-gcc.cmake"
+{%- endif %}
+            },
+            "description": "Configure Linux x64 GCC Unix Makefiles Debug using {% if use_vcpkg %}vcpkg and {% endif %}the selected target toolchain"
+        },
+        {
+            "name": "linux-x64-gcc-make-release",
+            "displayName": "Linux x64 GCC Unix Makefiles Release",
+            "inherits": [
+                "linux"
+            ],
+            "generator": "Unix Makefiles",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                {% if use_vcpkg %}
+                "VCPKG_TARGET_TRIPLET": "x64-linux",
+                "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/linux-x64-gcc.cmake"
+{%- else %}
+                "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/linux-x64-gcc.cmake"
+{%- endif %}
+            },
+            "description": "Configure Linux x64 GCC Unix Makefiles Release using {% if use_vcpkg %}vcpkg and {% endif %}the selected target toolchain"
+        },
+        {
+            "name": "linux-x64-clang-ninja-debug",
+            "displayName": "Linux x64 Clang Ninja Debug",
+            "inherits": [
+                "linux"
+            ],
+            "generator": "Ninja",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                {% if use_vcpkg %}
+                "VCPKG_TARGET_TRIPLET": "x64-linux",
+                "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/linux-x64-clang.cmake"
+{%- else %}
+                "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/linux-x64-clang.cmake"
+{%- endif %}
+            },
+            "description": "Configure Linux x64 Clang Ninja Debug using {% if use_vcpkg %}vcpkg and {% endif %}the selected target toolchain"
+        },
+        {
+            "name": "linux-x64-clang-ninja-release",
+            "displayName": "Linux x64 Clang Ninja Release",
+            "inherits": [
+                "linux"
+            ],
+            "generator": "Ninja",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                {% if use_vcpkg %}
+                "VCPKG_TARGET_TRIPLET": "x64-linux",
+                "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/linux-x64-clang.cmake"
+{%- else %}
+                "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/linux-x64-clang.cmake"
+{%- endif %}
+            },
+            "description": "Configure Linux x64 Clang Ninja Release using {% if use_vcpkg %}vcpkg and {% endif %}the selected target toolchain"
+        },
+        {
+            "name": "linux-x64-clang-make-debug",
+            "displayName": "Linux x64 Clang Unix Makefiles Debug",
+            "inherits": [
+                "linux"
+            ],
+            "generator": "Unix Makefiles",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                {% if use_vcpkg %}
+                "VCPKG_TARGET_TRIPLET": "x64-linux",
+                "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/linux-x64-clang.cmake"
+{%- else %}
+                "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/linux-x64-clang.cmake"
+{%- endif %}
+            },
+            "description": "Configure Linux x64 Clang Unix Makefiles Debug using {% if use_vcpkg %}vcpkg and {% endif %}the selected target toolchain"
+        },
+        {
+            "name": "linux-x64-clang-make-release",
+            "displayName": "Linux x64 Clang Unix Makefiles Release",
+            "inherits": [
+                "linux"
+            ],
+            "generator": "Unix Makefiles",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                {% if use_vcpkg %}
+                "VCPKG_TARGET_TRIPLET": "x64-linux",
+                "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/linux-x64-clang.cmake"
+{%- else %}
+                "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/linux-x64-clang.cmake"
+{%- endif %}
+            },
+            "description": "Configure Linux x64 Clang Unix Makefiles Release using {% if use_vcpkg %}vcpkg and {% endif %}the selected target toolchain"
+        },
+        {
+            "name": "linux-arm64-gcc-ninja-debug",
+            "displayName": "Linux ARM64 GCC Ninja Debug",
+            "inherits": [
+                "linux"
+            ],
+            "generator": "Ninja",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                {% if use_vcpkg %}
+                "VCPKG_TARGET_TRIPLET": "arm64-linux",
+                "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/linux-arm64-gcc.cmake"
+{%- else %}
+                "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/linux-arm64-gcc.cmake"
+{%- endif %}
+            },
+            "description": "Configure Linux ARM64 GCC Ninja Debug using {% if use_vcpkg %}vcpkg and {% endif %}the selected target toolchain"
+        },
+        {
+            "name": "linux-arm64-gcc-ninja-release",
+            "displayName": "Linux ARM64 GCC Ninja Release",
+            "inherits": [
+                "linux"
+            ],
+            "generator": "Ninja",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                {% if use_vcpkg %}
+                "VCPKG_TARGET_TRIPLET": "arm64-linux",
+                "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/linux-arm64-gcc.cmake"
+{%- else %}
+                "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/linux-arm64-gcc.cmake"
+{%- endif %}
+            },
+            "description": "Configure Linux ARM64 GCC Ninja Release using {% if use_vcpkg %}vcpkg and {% endif %}the selected target toolchain"
+        },
+        {
+            "name": "linux-arm64-gcc-make-debug",
+            "displayName": "Linux ARM64 GCC Unix Makefiles Debug",
+            "inherits": [
+                "linux"
+            ],
+            "generator": "Unix Makefiles",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                {% if use_vcpkg %}
+                "VCPKG_TARGET_TRIPLET": "arm64-linux",
+                "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/linux-arm64-gcc.cmake"
+{%- else %}
+                "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/linux-arm64-gcc.cmake"
+{%- endif %}
+            },
+            "description": "Configure Linux ARM64 GCC Unix Makefiles Debug using {% if use_vcpkg %}vcpkg and {% endif %}the selected target toolchain"
+        },
+        {
+            "name": "linux-arm64-gcc-make-release",
+            "displayName": "Linux ARM64 GCC Unix Makefiles Release",
+            "inherits": [
+                "linux"
+            ],
+            "generator": "Unix Makefiles",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                {% if use_vcpkg %}
+                "VCPKG_TARGET_TRIPLET": "arm64-linux",
+                "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/linux-arm64-gcc.cmake"
+{%- else %}
+                "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/linux-arm64-gcc.cmake"
+{%- endif %}
+            },
+            "description": "Configure Linux ARM64 GCC Unix Makefiles Release using {% if use_vcpkg %}vcpkg and {% endif %}the selected target toolchain"
+        },
+        {
+            "name": "linux-arm64-clang-ninja-debug",
+            "displayName": "Linux ARM64 Clang Ninja Debug",
+            "inherits": [
+                "linux"
+            ],
+            "generator": "Ninja",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                {% if use_vcpkg %}
+                "VCPKG_TARGET_TRIPLET": "arm64-linux",
+                "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/linux-arm64-clang.cmake"
+{%- else %}
+                "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/linux-arm64-clang.cmake"
+{%- endif %}
+            },
+            "description": "Configure Linux ARM64 Clang Ninja Debug using {% if use_vcpkg %}vcpkg and {% endif %}the selected target toolchain"
+        },
+        {
+            "name": "linux-arm64-clang-ninja-release",
+            "displayName": "Linux ARM64 Clang Ninja Release",
+            "inherits": [
+                "linux"
+            ],
+            "generator": "Ninja",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                {% if use_vcpkg %}
+                "VCPKG_TARGET_TRIPLET": "arm64-linux",
+                "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/linux-arm64-clang.cmake"
+{%- else %}
+                "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/linux-arm64-clang.cmake"
+{%- endif %}
+            },
+            "description": "Configure Linux ARM64 Clang Ninja Release using {% if use_vcpkg %}vcpkg and {% endif %}the selected target toolchain"
+        },
+        {
+            "name": "linux-arm64-clang-make-debug",
+            "displayName": "Linux ARM64 Clang Unix Makefiles Debug",
+            "inherits": [
+                "linux"
+            ],
+            "generator": "Unix Makefiles",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                {% if use_vcpkg %}
+                "VCPKG_TARGET_TRIPLET": "arm64-linux",
+                "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/linux-arm64-clang.cmake"
+{%- else %}
+                "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/linux-arm64-clang.cmake"
+{%- endif %}
+            },
+            "description": "Configure Linux ARM64 Clang Unix Makefiles Debug using {% if use_vcpkg %}vcpkg and {% endif %}the selected target toolchain"
+        },
+        {
+            "name": "linux-arm64-clang-make-release",
+            "displayName": "Linux ARM64 Clang Unix Makefiles Release",
+            "inherits": [
+                "linux"
+            ],
+            "generator": "Unix Makefiles",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                {% if use_vcpkg %}
+                "VCPKG_TARGET_TRIPLET": "arm64-linux",
+                "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/linux-arm64-clang.cmake"
+{%- else %}
+                "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/linux-arm64-clang.cmake"
+{%- endif %}
+            },
+            "description": "Configure Linux ARM64 Clang Unix Makefiles Release using {% if use_vcpkg %}vcpkg and {% endif %}the selected target toolchain"
+        },
+        {
+            "name": "macos-x64-clang-ninja-debug",
+            "displayName": "macOS x64 Clang Ninja Debug",
+            "inherits": [
+                "macos"
+            ],
+            "generator": "Ninja",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                {% if use_vcpkg %}
+                "VCPKG_TARGET_TRIPLET": "x64-osx",
+                "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/macos-x64-clang.cmake"
+{%- else %}
+                "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/macos-x64-clang.cmake"
+{%- endif %}
+            },
+            "description": "Configure macOS x64 Clang Ninja Debug using {% if use_vcpkg %}vcpkg and {% endif %}the selected target toolchain"
+        },
+        {
+            "name": "macos-x64-clang-ninja-release",
+            "displayName": "macOS x64 Clang Ninja Release",
+            "inherits": [
+                "macos"
+            ],
+            "generator": "Ninja",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                {% if use_vcpkg %}
+                "VCPKG_TARGET_TRIPLET": "x64-osx",
+                "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/macos-x64-clang.cmake"
+{%- else %}
+                "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/macos-x64-clang.cmake"
+{%- endif %}
+            },
+            "description": "Configure macOS x64 Clang Ninja Release using {% if use_vcpkg %}vcpkg and {% endif %}the selected target toolchain"
+        },
+        {
+            "name": "macos-x64-clang-xcode",
+            "displayName": "macOS x64 Clang Xcode",
+            "inherits": [
+                "macos"
+            ],
+            "generator": "Xcode",
+            "cacheVariables": {
+                {% if use_vcpkg %}
+                "VCPKG_TARGET_TRIPLET": "x64-osx",
+                "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/macos-x64-clang.cmake"
+{%- else %}
+                "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/macos-x64-clang.cmake"
+{%- endif %}
+            },
+            "description": "Configure macOS x64 Clang Xcode using {% if use_vcpkg %}vcpkg and {% endif %}the selected target toolchain"
+        },
+        {
+            "name": "macos-arm64-clang-ninja-debug",
+            "displayName": "macOS ARM64 Clang Ninja Debug",
+            "inherits": [
+                "macos"
+            ],
+            "generator": "Ninja",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                {% if use_vcpkg %}
+                "VCPKG_TARGET_TRIPLET": "arm64-osx",
+                "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/macos-arm64-clang.cmake"
+{%- else %}
+                "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/macos-arm64-clang.cmake"
+{%- endif %}
+            },
+            "description": "Configure macOS ARM64 Clang Ninja Debug using {% if use_vcpkg %}vcpkg and {% endif %}the selected target toolchain"
+        },
+        {
+            "name": "macos-arm64-clang-ninja-release",
+            "displayName": "macOS ARM64 Clang Ninja Release",
+            "inherits": [
+                "macos"
+            ],
+            "generator": "Ninja",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                {% if use_vcpkg %}
+                "VCPKG_TARGET_TRIPLET": "arm64-osx",
+                "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/macos-arm64-clang.cmake"
+{%- else %}
+                "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/macos-arm64-clang.cmake"
+{%- endif %}
+            },
+            "description": "Configure macOS ARM64 Clang Ninja Release using {% if use_vcpkg %}vcpkg and {% endif %}the selected target toolchain"
+        },
+        {
+            "name": "macos-arm64-clang-xcode",
+            "displayName": "macOS ARM64 Clang Xcode",
+            "inherits": [
+                "macos"
+            ],
+            "generator": "Xcode",
+            "cacheVariables": {
+                {% if use_vcpkg %}
+                "VCPKG_TARGET_TRIPLET": "arm64-osx",
+                "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/macos-arm64-clang.cmake"
+{%- else %}
+                "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/macos-arm64-clang.cmake"
+{%- endif %}
+            },
+            "description": "Configure macOS ARM64 Clang Xcode using {% if use_vcpkg %}vcpkg and {% endif %}the selected target toolchain"
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "windows",
+            "displayName": "Windows",
+            "hidden": true,
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Windows"
+            },
+            "description": "Common Windows build settings"
+        },
+        {
+            "name": "linux",
+            "displayName": "Linux",
+            "hidden": true,
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Linux"
+            },
+            "description": "Common Linux build settings"
+        },
+        {
+            "name": "macos",
+            "displayName": "macOS",
+            "hidden": true,
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Darwin"
+            },
+            "description": "Common macOS build settings"
+        },
+        {
+            "name": "windows-x64-msvc-vs2022-debug",
+            "displayName": "Windows x64 MSVC Visual Studio 2022 Debug",
+            "configurePreset": "windows-x64-msvc-vs2022",
+            "configuration": "Debug",
+            "inherits": [
+                "windows"
+            ],
+            "description": "Build Windows x64 MSVC Visual Studio 2022 Debug"
+        },
+        {
+            "name": "windows-x64-msvc-vs2022-release",
+            "displayName": "Windows x64 MSVC Visual Studio 2022 Release",
+            "configurePreset": "windows-x64-msvc-vs2022",
+            "configuration": "Release",
+            "inherits": [
+                "windows"
+            ],
+            "description": "Build Windows x64 MSVC Visual Studio 2022 Release"
+        },
+        {
+            "name": "windows-x64-clang-cl-ninja-debug",
+            "displayName": "Windows x64 Clang-CL Ninja Debug",
+            "configurePreset": "windows-x64-clang-cl-ninja-debug",
+            "inherits": [
+                "windows"
+            ],
+            "description": "Build Windows x64 Clang-CL Ninja Debug"
+        },
+        {
+            "name": "windows-x64-clang-cl-ninja-release",
+            "displayName": "Windows x64 Clang-CL Ninja Release",
+            "configurePreset": "windows-x64-clang-cl-ninja-release",
+            "inherits": [
+                "windows"
+            ],
+            "description": "Build Windows x64 Clang-CL Ninja Release"
+        },
+        {
+            "name": "windows-x64-clang-ninja-debug",
+            "displayName": "Windows x64 Clang Ninja Debug",
+            "configurePreset": "windows-x64-clang-ninja-debug",
+            "inherits": [
+                "windows"
+            ],
+            "description": "Build Windows x64 Clang Ninja Debug"
+        },
+        {
+            "name": "windows-x64-clang-ninja-release",
+            "displayName": "Windows x64 Clang Ninja Release",
+            "configurePreset": "windows-x64-clang-ninja-release",
+            "inherits": [
+                "windows"
+            ],
+            "description": "Build Windows x64 Clang Ninja Release"
+        },
+        {
+            "name": "windows-arm64-msvc-vs2022-debug",
+            "displayName": "Windows ARM64 MSVC Visual Studio 2022 Debug",
+            "configurePreset": "windows-arm64-msvc-vs2022",
+            "configuration": "Debug",
+            "inherits": [
+                "windows"
+            ],
+            "description": "Build Windows ARM64 MSVC Visual Studio 2022 Debug"
+        },
+        {
+            "name": "windows-arm64-msvc-vs2022-release",
+            "displayName": "Windows ARM64 MSVC Visual Studio 2022 Release",
+            "configurePreset": "windows-arm64-msvc-vs2022",
+            "configuration": "Release",
+            "inherits": [
+                "windows"
+            ],
+            "description": "Build Windows ARM64 MSVC Visual Studio 2022 Release"
+        },
+        {
+            "name": "windows-arm64-clang-cl-ninja-debug",
+            "displayName": "Windows ARM64 Clang-CL Ninja Debug",
+            "configurePreset": "windows-arm64-clang-cl-ninja-debug",
+            "inherits": [
+                "windows"
+            ],
+            "description": "Build Windows ARM64 Clang-CL Ninja Debug"
+        },
+        {
+            "name": "windows-arm64-clang-cl-ninja-release",
+            "displayName": "Windows ARM64 Clang-CL Ninja Release",
+            "configurePreset": "windows-arm64-clang-cl-ninja-release",
+            "inherits": [
+                "windows"
+            ],
+            "description": "Build Windows ARM64 Clang-CL Ninja Release"
+        },
+        {
+            "name": "windows-arm64-clang-ninja-debug",
+            "displayName": "Windows ARM64 Clang Ninja Debug",
+            "configurePreset": "windows-arm64-clang-ninja-debug",
+            "inherits": [
+                "windows"
+            ],
+            "description": "Build Windows ARM64 Clang Ninja Debug"
+        },
+        {
+            "name": "windows-arm64-clang-ninja-release",
+            "displayName": "Windows ARM64 Clang Ninja Release",
+            "configurePreset": "windows-arm64-clang-ninja-release",
+            "inherits": [
+                "windows"
+            ],
+            "description": "Build Windows ARM64 Clang Ninja Release"
+        },
+        {
+            "name": "linux-x64-gcc-ninja-debug",
+            "displayName": "Linux x64 GCC Ninja Debug",
+            "configurePreset": "linux-x64-gcc-ninja-debug",
+            "inherits": [
+                "linux"
+            ],
+            "description": "Build Linux x64 GCC Ninja Debug"
+        },
+        {
+            "name": "linux-x64-gcc-ninja-release",
+            "displayName": "Linux x64 GCC Ninja Release",
+            "configurePreset": "linux-x64-gcc-ninja-release",
+            "inherits": [
+                "linux"
+            ],
+            "description": "Build Linux x64 GCC Ninja Release"
+        },
+        {
+            "name": "linux-x64-gcc-make-debug",
+            "displayName": "Linux x64 GCC Unix Makefiles Debug",
+            "configurePreset": "linux-x64-gcc-make-debug",
+            "inherits": [
+                "linux"
+            ],
+            "description": "Build Linux x64 GCC Unix Makefiles Debug"
+        },
+        {
+            "name": "linux-x64-gcc-make-release",
+            "displayName": "Linux x64 GCC Unix Makefiles Release",
+            "configurePreset": "linux-x64-gcc-make-release",
+            "inherits": [
+                "linux"
+            ],
+            "description": "Build Linux x64 GCC Unix Makefiles Release"
+        },
+        {
+            "name": "linux-x64-clang-ninja-debug",
+            "displayName": "Linux x64 Clang Ninja Debug",
+            "configurePreset": "linux-x64-clang-ninja-debug",
+            "inherits": [
+                "linux"
+            ],
+            "description": "Build Linux x64 Clang Ninja Debug"
+        },
+        {
+            "name": "linux-x64-clang-ninja-release",
+            "displayName": "Linux x64 Clang Ninja Release",
+            "configurePreset": "linux-x64-clang-ninja-release",
+            "inherits": [
+                "linux"
+            ],
+            "description": "Build Linux x64 Clang Ninja Release"
+        },
+        {
+            "name": "linux-x64-clang-make-debug",
+            "displayName": "Linux x64 Clang Unix Makefiles Debug",
+            "configurePreset": "linux-x64-clang-make-debug",
+            "inherits": [
+                "linux"
+            ],
+            "description": "Build Linux x64 Clang Unix Makefiles Debug"
+        },
+        {
+            "name": "linux-x64-clang-make-release",
+            "displayName": "Linux x64 Clang Unix Makefiles Release",
+            "configurePreset": "linux-x64-clang-make-release",
+            "inherits": [
+                "linux"
+            ],
+            "description": "Build Linux x64 Clang Unix Makefiles Release"
+        },
+        {
+            "name": "linux-arm64-gcc-ninja-debug",
+            "displayName": "Linux ARM64 GCC Ninja Debug",
+            "configurePreset": "linux-arm64-gcc-ninja-debug",
+            "inherits": [
+                "linux"
+            ],
+            "description": "Build Linux ARM64 GCC Ninja Debug"
+        },
+        {
+            "name": "linux-arm64-gcc-ninja-release",
+            "displayName": "Linux ARM64 GCC Ninja Release",
+            "configurePreset": "linux-arm64-gcc-ninja-release",
+            "inherits": [
+                "linux"
+            ],
+            "description": "Build Linux ARM64 GCC Ninja Release"
+        },
+        {
+            "name": "linux-arm64-gcc-make-debug",
+            "displayName": "Linux ARM64 GCC Unix Makefiles Debug",
+            "configurePreset": "linux-arm64-gcc-make-debug",
+            "inherits": [
+                "linux"
+            ],
+            "description": "Build Linux ARM64 GCC Unix Makefiles Debug"
+        },
+        {
+            "name": "linux-arm64-gcc-make-release",
+            "displayName": "Linux ARM64 GCC Unix Makefiles Release",
+            "configurePreset": "linux-arm64-gcc-make-release",
+            "inherits": [
+                "linux"
+            ],
+            "description": "Build Linux ARM64 GCC Unix Makefiles Release"
+        },
+        {
+            "name": "linux-arm64-clang-ninja-debug",
+            "displayName": "Linux ARM64 Clang Ninja Debug",
+            "configurePreset": "linux-arm64-clang-ninja-debug",
+            "inherits": [
+                "linux"
+            ],
+            "description": "Build Linux ARM64 Clang Ninja Debug"
+        },
+        {
+            "name": "linux-arm64-clang-ninja-release",
+            "displayName": "Linux ARM64 Clang Ninja Release",
+            "configurePreset": "linux-arm64-clang-ninja-release",
+            "inherits": [
+                "linux"
+            ],
+            "description": "Build Linux ARM64 Clang Ninja Release"
+        },
+        {
+            "name": "linux-arm64-clang-make-debug",
+            "displayName": "Linux ARM64 Clang Unix Makefiles Debug",
+            "configurePreset": "linux-arm64-clang-make-debug",
+            "inherits": [
+                "linux"
+            ],
+            "description": "Build Linux ARM64 Clang Unix Makefiles Debug"
+        },
+        {
+            "name": "linux-arm64-clang-make-release",
+            "displayName": "Linux ARM64 Clang Unix Makefiles Release",
+            "configurePreset": "linux-arm64-clang-make-release",
+            "inherits": [
+                "linux"
+            ],
+            "description": "Build Linux ARM64 Clang Unix Makefiles Release"
+        },
+        {
+            "name": "macos-x64-clang-ninja-debug",
+            "displayName": "macOS x64 Clang Ninja Debug",
+            "configurePreset": "macos-x64-clang-ninja-debug",
+            "inherits": [
+                "macos"
+            ],
+            "description": "Build macOS x64 Clang Ninja Debug"
+        },
+        {
+            "name": "macos-x64-clang-ninja-release",
+            "displayName": "macOS x64 Clang Ninja Release",
+            "configurePreset": "macos-x64-clang-ninja-release",
+            "inherits": [
+                "macos"
+            ],
+            "description": "Build macOS x64 Clang Ninja Release"
+        },
+        {
+            "name": "macos-x64-clang-xcode-debug",
+            "displayName": "macOS x64 Clang Xcode Debug",
+            "configurePreset": "macos-x64-clang-xcode",
+            "configuration": "Debug",
+            "inherits": [
+                "macos"
+            ],
+            "description": "Build macOS x64 Clang Xcode Debug"
+        },
+        {
+            "name": "macos-x64-clang-xcode-release",
+            "displayName": "macOS x64 Clang Xcode Release",
+            "configurePreset": "macos-x64-clang-xcode",
+            "configuration": "Release",
+            "inherits": [
+                "macos"
+            ],
+            "description": "Build macOS x64 Clang Xcode Release"
+        },
+        {
+            "name": "macos-arm64-clang-ninja-debug",
+            "displayName": "macOS ARM64 Clang Ninja Debug",
+            "configurePreset": "macos-arm64-clang-ninja-debug",
+            "inherits": [
+                "macos"
+            ],
+            "description": "Build macOS ARM64 Clang Ninja Debug"
+        },
+        {
+            "name": "macos-arm64-clang-ninja-release",
+            "displayName": "macOS ARM64 Clang Ninja Release",
+            "configurePreset": "macos-arm64-clang-ninja-release",
+            "inherits": [
+                "macos"
+            ],
+            "description": "Build macOS ARM64 Clang Ninja Release"
+        },
+        {
+            "name": "macos-arm64-clang-xcode-debug",
+            "displayName": "macOS ARM64 Clang Xcode Debug",
+            "configurePreset": "macos-arm64-clang-xcode",
+            "configuration": "Debug",
+            "inherits": [
+                "macos"
+            ],
+            "description": "Build macOS ARM64 Clang Xcode Debug"
+        },
+        {
+            "name": "macos-arm64-clang-xcode-release",
+            "displayName": "macOS ARM64 Clang Xcode Release",
+            "configurePreset": "macos-arm64-clang-xcode",
+            "configuration": "Release",
+            "inherits": [
+                "macos"
+            ],
+            "description": "Build macOS ARM64 Clang Xcode Release"
+        }
+    ],
+    "testPresets": [
+        {
+            "name": "windows",
+            "displayName": "Windows",
+            "hidden": true,
+            "output": {
+                "outputOnFailure": true
+            },
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Windows"
+            },
+            "description": "Common Windows test settings with failure output enabled"
+        },
+        {
+            "name": "linux",
+            "displayName": "Linux",
+            "hidden": true,
+            "output": {
+                "outputOnFailure": true
+            },
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Linux"
+            },
+            "description": "Common Linux test settings with failure output enabled"
+        },
+        {
+            "name": "macos",
+            "displayName": "macOS",
+            "hidden": true,
+            "output": {
+                "outputOnFailure": true
+            },
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Darwin"
+            },
+            "description": "Common macOS test settings with failure output enabled"
+        },
+        {
+            "name": "windows-x64-msvc-vs2022-debug",
+            "displayName": "Windows x64 MSVC Visual Studio 2022 Debug",
+            "configurePreset": "windows-x64-msvc-vs2022",
+            "configuration": "Debug",
+            "inherits": [
+                "windows"
+            ],
+            "description": "Run tests for Windows x64 MSVC Visual Studio 2022 Debug"
+        },
+        {
+            "name": "windows-x64-msvc-vs2022-release",
+            "displayName": "Windows x64 MSVC Visual Studio 2022 Release",
+            "configurePreset": "windows-x64-msvc-vs2022",
+            "configuration": "Release",
+            "inherits": [
+                "windows"
+            ],
+            "description": "Run tests for Windows x64 MSVC Visual Studio 2022 Release"
+        },
+        {
+            "name": "windows-x64-clang-cl-ninja-debug",
+            "displayName": "Windows x64 Clang-CL Ninja Debug",
+            "configurePreset": "windows-x64-clang-cl-ninja-debug",
+            "inherits": [
+                "windows"
+            ],
+            "description": "Run tests for Windows x64 Clang-CL Ninja Debug"
+        },
+        {
+            "name": "windows-x64-clang-cl-ninja-release",
+            "displayName": "Windows x64 Clang-CL Ninja Release",
+            "configurePreset": "windows-x64-clang-cl-ninja-release",
+            "inherits": [
+                "windows"
+            ],
+            "description": "Run tests for Windows x64 Clang-CL Ninja Release"
+        },
+        {
+            "name": "windows-x64-clang-ninja-debug",
+            "displayName": "Windows x64 Clang Ninja Debug",
+            "configurePreset": "windows-x64-clang-ninja-debug",
+            "inherits": [
+                "windows"
+            ],
+            "description": "Run tests for Windows x64 Clang Ninja Debug"
+        },
+        {
+            "name": "windows-x64-clang-ninja-release",
+            "displayName": "Windows x64 Clang Ninja Release",
+            "configurePreset": "windows-x64-clang-ninja-release",
+            "inherits": [
+                "windows"
+            ],
+            "description": "Run tests for Windows x64 Clang Ninja Release"
+        },
+        {
+            "name": "windows-arm64-msvc-vs2022-debug",
+            "displayName": "Windows ARM64 MSVC Visual Studio 2022 Debug",
+            "configurePreset": "windows-arm64-msvc-vs2022",
+            "configuration": "Debug",
+            "inherits": [
+                "windows"
+            ],
+            "description": "Run tests for Windows ARM64 MSVC Visual Studio 2022 Debug"
+        },
+        {
+            "name": "windows-arm64-msvc-vs2022-release",
+            "displayName": "Windows ARM64 MSVC Visual Studio 2022 Release",
+            "configurePreset": "windows-arm64-msvc-vs2022",
+            "configuration": "Release",
+            "inherits": [
+                "windows"
+            ],
+            "description": "Run tests for Windows ARM64 MSVC Visual Studio 2022 Release"
+        },
+        {
+            "name": "windows-arm64-clang-cl-ninja-debug",
+            "displayName": "Windows ARM64 Clang-CL Ninja Debug",
+            "configurePreset": "windows-arm64-clang-cl-ninja-debug",
+            "inherits": [
+                "windows"
+            ],
+            "description": "Run tests for Windows ARM64 Clang-CL Ninja Debug"
+        },
+        {
+            "name": "windows-arm64-clang-cl-ninja-release",
+            "displayName": "Windows ARM64 Clang-CL Ninja Release",
+            "configurePreset": "windows-arm64-clang-cl-ninja-release",
+            "inherits": [
+                "windows"
+            ],
+            "description": "Run tests for Windows ARM64 Clang-CL Ninja Release"
+        },
+        {
+            "name": "windows-arm64-clang-ninja-debug",
+            "displayName": "Windows ARM64 Clang Ninja Debug",
+            "configurePreset": "windows-arm64-clang-ninja-debug",
+            "inherits": [
+                "windows"
+            ],
+            "description": "Run tests for Windows ARM64 Clang Ninja Debug"
+        },
+        {
+            "name": "windows-arm64-clang-ninja-release",
+            "displayName": "Windows ARM64 Clang Ninja Release",
+            "configurePreset": "windows-arm64-clang-ninja-release",
+            "inherits": [
+                "windows"
+            ],
+            "description": "Run tests for Windows ARM64 Clang Ninja Release"
+        },
+        {
+            "name": "linux-x64-gcc-ninja-debug",
+            "displayName": "Linux x64 GCC Ninja Debug",
+            "configurePreset": "linux-x64-gcc-ninja-debug",
+            "inherits": [
+                "linux"
+            ],
+            "description": "Run tests for Linux x64 GCC Ninja Debug"
+        },
+        {
+            "name": "linux-x64-gcc-ninja-release",
+            "displayName": "Linux x64 GCC Ninja Release",
+            "configurePreset": "linux-x64-gcc-ninja-release",
+            "inherits": [
+                "linux"
+            ],
+            "description": "Run tests for Linux x64 GCC Ninja Release"
+        },
+        {
+            "name": "linux-x64-gcc-make-debug",
+            "displayName": "Linux x64 GCC Unix Makefiles Debug",
+            "configurePreset": "linux-x64-gcc-make-debug",
+            "inherits": [
+                "linux"
+            ],
+            "description": "Run tests for Linux x64 GCC Unix Makefiles Debug"
+        },
+        {
+            "name": "linux-x64-gcc-make-release",
+            "displayName": "Linux x64 GCC Unix Makefiles Release",
+            "configurePreset": "linux-x64-gcc-make-release",
+            "inherits": [
+                "linux"
+            ],
+            "description": "Run tests for Linux x64 GCC Unix Makefiles Release"
+        },
+        {
+            "name": "linux-x64-clang-ninja-debug",
+            "displayName": "Linux x64 Clang Ninja Debug",
+            "configurePreset": "linux-x64-clang-ninja-debug",
+            "inherits": [
+                "linux"
+            ],
+            "description": "Run tests for Linux x64 Clang Ninja Debug"
+        },
+        {
+            "name": "linux-x64-clang-ninja-release",
+            "displayName": "Linux x64 Clang Ninja Release",
+            "configurePreset": "linux-x64-clang-ninja-release",
+            "inherits": [
+                "linux"
+            ],
+            "description": "Run tests for Linux x64 Clang Ninja Release"
+        },
+        {
+            "name": "linux-x64-clang-make-debug",
+            "displayName": "Linux x64 Clang Unix Makefiles Debug",
+            "configurePreset": "linux-x64-clang-make-debug",
+            "inherits": [
+                "linux"
+            ],
+            "description": "Run tests for Linux x64 Clang Unix Makefiles Debug"
+        },
+        {
+            "name": "linux-x64-clang-make-release",
+            "displayName": "Linux x64 Clang Unix Makefiles Release",
+            "configurePreset": "linux-x64-clang-make-release",
+            "inherits": [
+                "linux"
+            ],
+            "description": "Run tests for Linux x64 Clang Unix Makefiles Release"
+        },
+        {
+            "name": "linux-arm64-gcc-ninja-debug",
+            "displayName": "Linux ARM64 GCC Ninja Debug",
+            "configurePreset": "linux-arm64-gcc-ninja-debug",
+            "inherits": [
+                "linux"
+            ],
+            "description": "Run tests for Linux ARM64 GCC Ninja Debug"
+        },
+        {
+            "name": "linux-arm64-gcc-ninja-release",
+            "displayName": "Linux ARM64 GCC Ninja Release",
+            "configurePreset": "linux-arm64-gcc-ninja-release",
+            "inherits": [
+                "linux"
+            ],
+            "description": "Run tests for Linux ARM64 GCC Ninja Release"
+        },
+        {
+            "name": "linux-arm64-gcc-make-debug",
+            "displayName": "Linux ARM64 GCC Unix Makefiles Debug",
+            "configurePreset": "linux-arm64-gcc-make-debug",
+            "inherits": [
+                "linux"
+            ],
+            "description": "Run tests for Linux ARM64 GCC Unix Makefiles Debug"
+        },
+        {
+            "name": "linux-arm64-gcc-make-release",
+            "displayName": "Linux ARM64 GCC Unix Makefiles Release",
+            "configurePreset": "linux-arm64-gcc-make-release",
+            "inherits": [
+                "linux"
+            ],
+            "description": "Run tests for Linux ARM64 GCC Unix Makefiles Release"
+        },
+        {
+            "name": "linux-arm64-clang-ninja-debug",
+            "displayName": "Linux ARM64 Clang Ninja Debug",
+            "configurePreset": "linux-arm64-clang-ninja-debug",
+            "inherits": [
+                "linux"
+            ],
+            "description": "Run tests for Linux ARM64 Clang Ninja Debug"
+        },
+        {
+            "name": "linux-arm64-clang-ninja-release",
+            "displayName": "Linux ARM64 Clang Ninja Release",
+            "configurePreset": "linux-arm64-clang-ninja-release",
+            "inherits": [
+                "linux"
+            ],
+            "description": "Run tests for Linux ARM64 Clang Ninja Release"
+        },
+        {
+            "name": "linux-arm64-clang-make-debug",
+            "displayName": "Linux ARM64 Clang Unix Makefiles Debug",
+            "configurePreset": "linux-arm64-clang-make-debug",
+            "inherits": [
+                "linux"
+            ],
+            "description": "Run tests for Linux ARM64 Clang Unix Makefiles Debug"
+        },
+        {
+            "name": "linux-arm64-clang-make-release",
+            "displayName": "Linux ARM64 Clang Unix Makefiles Release",
+            "configurePreset": "linux-arm64-clang-make-release",
+            "inherits": [
+                "linux"
+            ],
+            "description": "Run tests for Linux ARM64 Clang Unix Makefiles Release"
+        },
+        {
+            "name": "macos-x64-clang-ninja-debug",
+            "displayName": "macOS x64 Clang Ninja Debug",
+            "configurePreset": "macos-x64-clang-ninja-debug",
+            "inherits": [
+                "macos"
+            ],
+            "description": "Run tests for macOS x64 Clang Ninja Debug"
+        },
+        {
+            "name": "macos-x64-clang-ninja-release",
+            "displayName": "macOS x64 Clang Ninja Release",
+            "configurePreset": "macos-x64-clang-ninja-release",
+            "inherits": [
+                "macos"
+            ],
+            "description": "Run tests for macOS x64 Clang Ninja Release"
+        },
+        {
+            "name": "macos-x64-clang-xcode-debug",
+            "displayName": "macOS x64 Clang Xcode Debug",
+            "configurePreset": "macos-x64-clang-xcode",
+            "configuration": "Debug",
+            "inherits": [
+                "macos"
+            ],
+            "description": "Run tests for macOS x64 Clang Xcode Debug"
+        },
+        {
+            "name": "macos-x64-clang-xcode-release",
+            "displayName": "macOS x64 Clang Xcode Release",
+            "configurePreset": "macos-x64-clang-xcode",
+            "configuration": "Release",
+            "inherits": [
+                "macos"
+            ],
+            "description": "Run tests for macOS x64 Clang Xcode Release"
+        },
+        {
+            "name": "macos-arm64-clang-ninja-debug",
+            "displayName": "macOS ARM64 Clang Ninja Debug",
+            "configurePreset": "macos-arm64-clang-ninja-debug",
+            "inherits": [
+                "macos"
+            ],
+            "description": "Run tests for macOS ARM64 Clang Ninja Debug"
+        },
+        {
+            "name": "macos-arm64-clang-ninja-release",
+            "displayName": "macOS ARM64 Clang Ninja Release",
+            "configurePreset": "macos-arm64-clang-ninja-release",
+            "inherits": [
+                "macos"
+            ],
+            "description": "Run tests for macOS ARM64 Clang Ninja Release"
+        },
+        {
+            "name": "macos-arm64-clang-xcode-debug",
+            "displayName": "macOS ARM64 Clang Xcode Debug",
+            "configurePreset": "macos-arm64-clang-xcode",
+            "configuration": "Debug",
+            "inherits": [
+                "macos"
+            ],
+            "description": "Run tests for macOS ARM64 Clang Xcode Debug"
+        },
+        {
+            "name": "macos-arm64-clang-xcode-release",
+            "displayName": "macOS ARM64 Clang Xcode Release",
+            "configurePreset": "macos-arm64-clang-xcode",
+            "configuration": "Release",
+            "inherits": [
+                "macos"
+            ],
+            "description": "Run tests for macOS ARM64 Clang Xcode Release"
+        }
+    ],
+    "packagePresets": [
+        {
+            "name": "windows",
+            "displayName": "Windows",
+            "hidden": true,
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Windows"
+            },
+            "description": "Common Windows package settings"
+        },
+        {
+            "name": "linux",
+            "displayName": "Linux",
+            "hidden": true,
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Linux"
+            },
+            "description": "Common Linux package settings"
+        },
+        {
+            "name": "macos",
+            "displayName": "macOS",
+            "hidden": true,
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Darwin"
+            },
+            "description": "Common macOS package settings"
+        },
+        {
+            "name": "windows-x64-msvc-vs2022-debug",
+            "displayName": "Windows x64 MSVC Visual Studio 2022 Debug",
+            "configurePreset": "windows-x64-msvc-vs2022",
+            "configurations": [
+                "Debug"
+            ],
+            "inherits": [
+                "windows"
+            ],
+            "description": "Package Windows x64 MSVC Visual Studio 2022 Debug"
+        },
+        {
+            "name": "windows-x64-msvc-vs2022-release",
+            "displayName": "Windows x64 MSVC Visual Studio 2022 Release",
+            "configurePreset": "windows-x64-msvc-vs2022",
+            "configurations": [
+                "Release"
+            ],
+            "inherits": [
+                "windows"
+            ],
+            "description": "Package Windows x64 MSVC Visual Studio 2022 Release"
+        },
+        {
+            "name": "windows-x64-clang-cl-ninja-debug",
+            "displayName": "Windows x64 Clang-CL Ninja Debug",
+            "configurePreset": "windows-x64-clang-cl-ninja-debug",
+            "inherits": [
+                "windows"
+            ],
+            "description": "Package Windows x64 Clang-CL Ninja Debug"
+        },
+        {
+            "name": "windows-x64-clang-cl-ninja-release",
+            "displayName": "Windows x64 Clang-CL Ninja Release",
+            "configurePreset": "windows-x64-clang-cl-ninja-release",
+            "inherits": [
+                "windows"
+            ],
+            "description": "Package Windows x64 Clang-CL Ninja Release"
+        },
+        {
+            "name": "windows-x64-clang-ninja-debug",
+            "displayName": "Windows x64 Clang Ninja Debug",
+            "configurePreset": "windows-x64-clang-ninja-debug",
+            "inherits": [
+                "windows"
+            ],
+            "description": "Package Windows x64 Clang Ninja Debug"
+        },
+        {
+            "name": "windows-x64-clang-ninja-release",
+            "displayName": "Windows x64 Clang Ninja Release",
+            "configurePreset": "windows-x64-clang-ninja-release",
+            "inherits": [
+                "windows"
+            ],
+            "description": "Package Windows x64 Clang Ninja Release"
+        },
+        {
+            "name": "windows-arm64-msvc-vs2022-debug",
+            "displayName": "Windows ARM64 MSVC Visual Studio 2022 Debug",
+            "configurePreset": "windows-arm64-msvc-vs2022",
+            "configurations": [
+                "Debug"
+            ],
+            "inherits": [
+                "windows"
+            ],
+            "description": "Package Windows ARM64 MSVC Visual Studio 2022 Debug"
+        },
+        {
+            "name": "windows-arm64-msvc-vs2022-release",
+            "displayName": "Windows ARM64 MSVC Visual Studio 2022 Release",
+            "configurePreset": "windows-arm64-msvc-vs2022",
+            "configurations": [
+                "Release"
+            ],
+            "inherits": [
+                "windows"
+            ],
+            "description": "Package Windows ARM64 MSVC Visual Studio 2022 Release"
+        },
+        {
+            "name": "windows-arm64-clang-cl-ninja-debug",
+            "displayName": "Windows ARM64 Clang-CL Ninja Debug",
+            "configurePreset": "windows-arm64-clang-cl-ninja-debug",
+            "inherits": [
+                "windows"
+            ],
+            "description": "Package Windows ARM64 Clang-CL Ninja Debug"
+        },
+        {
+            "name": "windows-arm64-clang-cl-ninja-release",
+            "displayName": "Windows ARM64 Clang-CL Ninja Release",
+            "configurePreset": "windows-arm64-clang-cl-ninja-release",
+            "inherits": [
+                "windows"
+            ],
+            "description": "Package Windows ARM64 Clang-CL Ninja Release"
+        },
+        {
+            "name": "windows-arm64-clang-ninja-debug",
+            "displayName": "Windows ARM64 Clang Ninja Debug",
+            "configurePreset": "windows-arm64-clang-ninja-debug",
+            "inherits": [
+                "windows"
+            ],
+            "description": "Package Windows ARM64 Clang Ninja Debug"
+        },
+        {
+            "name": "windows-arm64-clang-ninja-release",
+            "displayName": "Windows ARM64 Clang Ninja Release",
+            "configurePreset": "windows-arm64-clang-ninja-release",
+            "inherits": [
+                "windows"
+            ],
+            "description": "Package Windows ARM64 Clang Ninja Release"
+        },
+        {
+            "name": "linux-x64-gcc-ninja-debug",
+            "displayName": "Linux x64 GCC Ninja Debug",
+            "configurePreset": "linux-x64-gcc-ninja-debug",
+            "inherits": [
+                "linux"
+            ],
+            "description": "Package Linux x64 GCC Ninja Debug"
+        },
+        {
+            "name": "linux-x64-gcc-ninja-release",
+            "displayName": "Linux x64 GCC Ninja Release",
+            "configurePreset": "linux-x64-gcc-ninja-release",
+            "inherits": [
+                "linux"
+            ],
+            "description": "Package Linux x64 GCC Ninja Release"
+        },
+        {
+            "name": "linux-x64-gcc-make-debug",
+            "displayName": "Linux x64 GCC Unix Makefiles Debug",
+            "configurePreset": "linux-x64-gcc-make-debug",
+            "inherits": [
+                "linux"
+            ],
+            "description": "Package Linux x64 GCC Unix Makefiles Debug"
+        },
+        {
+            "name": "linux-x64-gcc-make-release",
+            "displayName": "Linux x64 GCC Unix Makefiles Release",
+            "configurePreset": "linux-x64-gcc-make-release",
+            "inherits": [
+                "linux"
+            ],
+            "description": "Package Linux x64 GCC Unix Makefiles Release"
+        },
+        {
+            "name": "linux-x64-clang-ninja-debug",
+            "displayName": "Linux x64 Clang Ninja Debug",
+            "configurePreset": "linux-x64-clang-ninja-debug",
+            "inherits": [
+                "linux"
+            ],
+            "description": "Package Linux x64 Clang Ninja Debug"
+        },
+        {
+            "name": "linux-x64-clang-ninja-release",
+            "displayName": "Linux x64 Clang Ninja Release",
+            "configurePreset": "linux-x64-clang-ninja-release",
+            "inherits": [
+                "linux"
+            ],
+            "description": "Package Linux x64 Clang Ninja Release"
+        },
+        {
+            "name": "linux-x64-clang-make-debug",
+            "displayName": "Linux x64 Clang Unix Makefiles Debug",
+            "configurePreset": "linux-x64-clang-make-debug",
+            "inherits": [
+                "linux"
+            ],
+            "description": "Package Linux x64 Clang Unix Makefiles Debug"
+        },
+        {
+            "name": "linux-x64-clang-make-release",
+            "displayName": "Linux x64 Clang Unix Makefiles Release",
+            "configurePreset": "linux-x64-clang-make-release",
+            "inherits": [
+                "linux"
+            ],
+            "description": "Package Linux x64 Clang Unix Makefiles Release"
+        },
+        {
+            "name": "linux-arm64-gcc-ninja-debug",
+            "displayName": "Linux ARM64 GCC Ninja Debug",
+            "configurePreset": "linux-arm64-gcc-ninja-debug",
+            "inherits": [
+                "linux"
+            ],
+            "description": "Package Linux ARM64 GCC Ninja Debug"
+        },
+        {
+            "name": "linux-arm64-gcc-ninja-release",
+            "displayName": "Linux ARM64 GCC Ninja Release",
+            "configurePreset": "linux-arm64-gcc-ninja-release",
+            "inherits": [
+                "linux"
+            ],
+            "description": "Package Linux ARM64 GCC Ninja Release"
+        },
+        {
+            "name": "linux-arm64-gcc-make-debug",
+            "displayName": "Linux ARM64 GCC Unix Makefiles Debug",
+            "configurePreset": "linux-arm64-gcc-make-debug",
+            "inherits": [
+                "linux"
+            ],
+            "description": "Package Linux ARM64 GCC Unix Makefiles Debug"
+        },
+        {
+            "name": "linux-arm64-gcc-make-release",
+            "displayName": "Linux ARM64 GCC Unix Makefiles Release",
+            "configurePreset": "linux-arm64-gcc-make-release",
+            "inherits": [
+                "linux"
+            ],
+            "description": "Package Linux ARM64 GCC Unix Makefiles Release"
+        },
+        {
+            "name": "linux-arm64-clang-ninja-debug",
+            "displayName": "Linux ARM64 Clang Ninja Debug",
+            "configurePreset": "linux-arm64-clang-ninja-debug",
+            "inherits": [
+                "linux"
+            ],
+            "description": "Package Linux ARM64 Clang Ninja Debug"
+        },
+        {
+            "name": "linux-arm64-clang-ninja-release",
+            "displayName": "Linux ARM64 Clang Ninja Release",
+            "configurePreset": "linux-arm64-clang-ninja-release",
+            "inherits": [
+                "linux"
+            ],
+            "description": "Package Linux ARM64 Clang Ninja Release"
+        },
+        {
+            "name": "linux-arm64-clang-make-debug",
+            "displayName": "Linux ARM64 Clang Unix Makefiles Debug",
+            "configurePreset": "linux-arm64-clang-make-debug",
+            "inherits": [
+                "linux"
+            ],
+            "description": "Package Linux ARM64 Clang Unix Makefiles Debug"
+        },
+        {
+            "name": "linux-arm64-clang-make-release",
+            "displayName": "Linux ARM64 Clang Unix Makefiles Release",
+            "configurePreset": "linux-arm64-clang-make-release",
+            "inherits": [
+                "linux"
+            ],
+            "description": "Package Linux ARM64 Clang Unix Makefiles Release"
+        },
+        {
+            "name": "macos-x64-clang-ninja-debug",
+            "displayName": "macOS x64 Clang Ninja Debug",
+            "configurePreset": "macos-x64-clang-ninja-debug",
+            "inherits": [
+                "macos"
+            ],
+            "description": "Package macOS x64 Clang Ninja Debug"
+        },
+        {
+            "name": "macos-x64-clang-ninja-release",
+            "displayName": "macOS x64 Clang Ninja Release",
+            "configurePreset": "macos-x64-clang-ninja-release",
+            "inherits": [
+                "macos"
+            ],
+            "description": "Package macOS x64 Clang Ninja Release"
+        },
+        {
+            "name": "macos-x64-clang-xcode-debug",
+            "displayName": "macOS x64 Clang Xcode Debug",
+            "configurePreset": "macos-x64-clang-xcode",
+            "configurations": [
+                "Debug"
+            ],
+            "inherits": [
+                "macos"
+            ],
+            "description": "Package macOS x64 Clang Xcode Debug"
+        },
+        {
+            "name": "macos-x64-clang-xcode-release",
+            "displayName": "macOS x64 Clang Xcode Release",
+            "configurePreset": "macos-x64-clang-xcode",
+            "configurations": [
+                "Release"
+            ],
+            "inherits": [
+                "macos"
+            ],
+            "description": "Package macOS x64 Clang Xcode Release"
+        },
+        {
+            "name": "macos-arm64-clang-ninja-debug",
+            "displayName": "macOS ARM64 Clang Ninja Debug",
+            "configurePreset": "macos-arm64-clang-ninja-debug",
+            "inherits": [
+                "macos"
+            ],
+            "description": "Package macOS ARM64 Clang Ninja Debug"
+        },
+        {
+            "name": "macos-arm64-clang-ninja-release",
+            "displayName": "macOS ARM64 Clang Ninja Release",
+            "configurePreset": "macos-arm64-clang-ninja-release",
+            "inherits": [
+                "macos"
+            ],
+            "description": "Package macOS ARM64 Clang Ninja Release"
+        },
+        {
+            "name": "macos-arm64-clang-xcode-debug",
+            "displayName": "macOS ARM64 Clang Xcode Debug",
+            "configurePreset": "macos-arm64-clang-xcode",
+            "configurations": [
+                "Debug"
+            ],
+            "inherits": [
+                "macos"
+            ],
+            "description": "Package macOS ARM64 Clang Xcode Debug"
+        },
+        {
+            "name": "macos-arm64-clang-xcode-release",
+            "displayName": "macOS ARM64 Clang Xcode Release",
+            "configurePreset": "macos-arm64-clang-xcode",
+            "configurations": [
+                "Release"
+            ],
+            "inherits": [
+                "macos"
+            ],
+            "description": "Package macOS ARM64 Clang Xcode Release"
+        }
+    ],
+    "workflowPresets": [
+        {
+            "name": "windows-x64-msvc-vs2022-debug",
+            "displayName": "Windows x64 MSVC Visual Studio 2022 Debug",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "windows-x64-msvc-vs2022"
+                },
+                {
+                    "type": "build",
+                    "name": "windows-x64-msvc-vs2022-debug"
+                },
+                {
+                    "type": "test",
+                    "name": "windows-x64-msvc-vs2022-debug"
+                },
+                {
+                    "type": "package",
+                    "name": "windows-x64-msvc-vs2022-debug"
+                }
+            ],
+            "description": "Configure, build, test, and package Windows x64 MSVC Visual Studio 2022 Debug"
+        },
+        {
+            "name": "windows-x64-msvc-vs2022-release",
+            "displayName": "Windows x64 MSVC Visual Studio 2022 Release",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "windows-x64-msvc-vs2022"
+                },
+                {
+                    "type": "build",
+                    "name": "windows-x64-msvc-vs2022-release"
+                },
+                {
+                    "type": "test",
+                    "name": "windows-x64-msvc-vs2022-release"
+                },
+                {
+                    "type": "package",
+                    "name": "windows-x64-msvc-vs2022-release"
+                }
+            ],
+            "description": "Configure, build, test, and package Windows x64 MSVC Visual Studio 2022 Release"
+        },
+        {
+            "name": "windows-x64-clang-cl-ninja-debug",
+            "displayName": "Windows x64 Clang-CL Ninja Debug",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "windows-x64-clang-cl-ninja-debug"
+                },
+                {
+                    "type": "build",
+                    "name": "windows-x64-clang-cl-ninja-debug"
+                },
+                {
+                    "type": "test",
+                    "name": "windows-x64-clang-cl-ninja-debug"
+                },
+                {
+                    "type": "package",
+                    "name": "windows-x64-clang-cl-ninja-debug"
+                }
+            ],
+            "description": "Configure, build, test, and package Windows x64 Clang-CL Ninja Debug"
+        },
+        {
+            "name": "windows-x64-clang-cl-ninja-release",
+            "displayName": "Windows x64 Clang-CL Ninja Release",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "windows-x64-clang-cl-ninja-release"
+                },
+                {
+                    "type": "build",
+                    "name": "windows-x64-clang-cl-ninja-release"
+                },
+                {
+                    "type": "test",
+                    "name": "windows-x64-clang-cl-ninja-release"
+                },
+                {
+                    "type": "package",
+                    "name": "windows-x64-clang-cl-ninja-release"
+                }
+            ],
+            "description": "Configure, build, test, and package Windows x64 Clang-CL Ninja Release"
+        },
+        {
+            "name": "windows-x64-clang-ninja-debug",
+            "displayName": "Windows x64 Clang Ninja Debug",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "windows-x64-clang-ninja-debug"
+                },
+                {
+                    "type": "build",
+                    "name": "windows-x64-clang-ninja-debug"
+                },
+                {
+                    "type": "test",
+                    "name": "windows-x64-clang-ninja-debug"
+                },
+                {
+                    "type": "package",
+                    "name": "windows-x64-clang-ninja-debug"
+                }
+            ],
+            "description": "Configure, build, test, and package Windows x64 Clang Ninja Debug"
+        },
+        {
+            "name": "windows-x64-clang-ninja-release",
+            "displayName": "Windows x64 Clang Ninja Release",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "windows-x64-clang-ninja-release"
+                },
+                {
+                    "type": "build",
+                    "name": "windows-x64-clang-ninja-release"
+                },
+                {
+                    "type": "test",
+                    "name": "windows-x64-clang-ninja-release"
+                },
+                {
+                    "type": "package",
+                    "name": "windows-x64-clang-ninja-release"
+                }
+            ],
+            "description": "Configure, build, test, and package Windows x64 Clang Ninja Release"
+        },
+        {
+            "name": "windows-arm64-msvc-vs2022-debug",
+            "displayName": "Windows ARM64 MSVC Visual Studio 2022 Debug",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "windows-arm64-msvc-vs2022"
+                },
+                {
+                    "type": "build",
+                    "name": "windows-arm64-msvc-vs2022-debug"
+                },
+                {
+                    "type": "test",
+                    "name": "windows-arm64-msvc-vs2022-debug"
+                },
+                {
+                    "type": "package",
+                    "name": "windows-arm64-msvc-vs2022-debug"
+                }
+            ],
+            "description": "Configure, build, test, and package Windows ARM64 MSVC Visual Studio 2022 Debug"
+        },
+        {
+            "name": "windows-arm64-msvc-vs2022-release",
+            "displayName": "Windows ARM64 MSVC Visual Studio 2022 Release",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "windows-arm64-msvc-vs2022"
+                },
+                {
+                    "type": "build",
+                    "name": "windows-arm64-msvc-vs2022-release"
+                },
+                {
+                    "type": "test",
+                    "name": "windows-arm64-msvc-vs2022-release"
+                },
+                {
+                    "type": "package",
+                    "name": "windows-arm64-msvc-vs2022-release"
+                }
+            ],
+            "description": "Configure, build, test, and package Windows ARM64 MSVC Visual Studio 2022 Release"
+        },
+        {
+            "name": "windows-arm64-clang-cl-ninja-debug",
+            "displayName": "Windows ARM64 Clang-CL Ninja Debug",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "windows-arm64-clang-cl-ninja-debug"
+                },
+                {
+                    "type": "build",
+                    "name": "windows-arm64-clang-cl-ninja-debug"
+                },
+                {
+                    "type": "test",
+                    "name": "windows-arm64-clang-cl-ninja-debug"
+                },
+                {
+                    "type": "package",
+                    "name": "windows-arm64-clang-cl-ninja-debug"
+                }
+            ],
+            "description": "Configure, build, test, and package Windows ARM64 Clang-CL Ninja Debug"
+        },
+        {
+            "name": "windows-arm64-clang-cl-ninja-release",
+            "displayName": "Windows ARM64 Clang-CL Ninja Release",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "windows-arm64-clang-cl-ninja-release"
+                },
+                {
+                    "type": "build",
+                    "name": "windows-arm64-clang-cl-ninja-release"
+                },
+                {
+                    "type": "test",
+                    "name": "windows-arm64-clang-cl-ninja-release"
+                },
+                {
+                    "type": "package",
+                    "name": "windows-arm64-clang-cl-ninja-release"
+                }
+            ],
+            "description": "Configure, build, test, and package Windows ARM64 Clang-CL Ninja Release"
+        },
+        {
+            "name": "windows-arm64-clang-ninja-debug",
+            "displayName": "Windows ARM64 Clang Ninja Debug",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "windows-arm64-clang-ninja-debug"
+                },
+                {
+                    "type": "build",
+                    "name": "windows-arm64-clang-ninja-debug"
+                },
+                {
+                    "type": "test",
+                    "name": "windows-arm64-clang-ninja-debug"
+                },
+                {
+                    "type": "package",
+                    "name": "windows-arm64-clang-ninja-debug"
+                }
+            ],
+            "description": "Configure, build, test, and package Windows ARM64 Clang Ninja Debug"
+        },
+        {
+            "name": "windows-arm64-clang-ninja-release",
+            "displayName": "Windows ARM64 Clang Ninja Release",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "windows-arm64-clang-ninja-release"
+                },
+                {
+                    "type": "build",
+                    "name": "windows-arm64-clang-ninja-release"
+                },
+                {
+                    "type": "test",
+                    "name": "windows-arm64-clang-ninja-release"
+                },
+                {
+                    "type": "package",
+                    "name": "windows-arm64-clang-ninja-release"
+                }
+            ],
+            "description": "Configure, build, test, and package Windows ARM64 Clang Ninja Release"
+        },
+        {
+            "name": "linux-x64-gcc-ninja-debug",
+            "displayName": "Linux x64 GCC Ninja Debug",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "linux-x64-gcc-ninja-debug"
+                },
+                {
+                    "type": "build",
+                    "name": "linux-x64-gcc-ninja-debug"
+                },
+                {
+                    "type": "test",
+                    "name": "linux-x64-gcc-ninja-debug"
+                },
+                {
+                    "type": "package",
+                    "name": "linux-x64-gcc-ninja-debug"
+                }
+            ],
+            "description": "Configure, build, test, and package Linux x64 GCC Ninja Debug"
+        },
+        {
+            "name": "linux-x64-gcc-ninja-release",
+            "displayName": "Linux x64 GCC Ninja Release",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "linux-x64-gcc-ninja-release"
+                },
+                {
+                    "type": "build",
+                    "name": "linux-x64-gcc-ninja-release"
+                },
+                {
+                    "type": "test",
+                    "name": "linux-x64-gcc-ninja-release"
+                },
+                {
+                    "type": "package",
+                    "name": "linux-x64-gcc-ninja-release"
+                }
+            ],
+            "description": "Configure, build, test, and package Linux x64 GCC Ninja Release"
+        },
+        {
+            "name": "linux-x64-gcc-make-debug",
+            "displayName": "Linux x64 GCC Unix Makefiles Debug",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "linux-x64-gcc-make-debug"
+                },
+                {
+                    "type": "build",
+                    "name": "linux-x64-gcc-make-debug"
+                },
+                {
+                    "type": "test",
+                    "name": "linux-x64-gcc-make-debug"
+                },
+                {
+                    "type": "package",
+                    "name": "linux-x64-gcc-make-debug"
+                }
+            ],
+            "description": "Configure, build, test, and package Linux x64 GCC Unix Makefiles Debug"
+        },
+        {
+            "name": "linux-x64-gcc-make-release",
+            "displayName": "Linux x64 GCC Unix Makefiles Release",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "linux-x64-gcc-make-release"
+                },
+                {
+                    "type": "build",
+                    "name": "linux-x64-gcc-make-release"
+                },
+                {
+                    "type": "test",
+                    "name": "linux-x64-gcc-make-release"
+                },
+                {
+                    "type": "package",
+                    "name": "linux-x64-gcc-make-release"
+                }
+            ],
+            "description": "Configure, build, test, and package Linux x64 GCC Unix Makefiles Release"
+        },
+        {
+            "name": "linux-x64-clang-ninja-debug",
+            "displayName": "Linux x64 Clang Ninja Debug",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "linux-x64-clang-ninja-debug"
+                },
+                {
+                    "type": "build",
+                    "name": "linux-x64-clang-ninja-debug"
+                },
+                {
+                    "type": "test",
+                    "name": "linux-x64-clang-ninja-debug"
+                },
+                {
+                    "type": "package",
+                    "name": "linux-x64-clang-ninja-debug"
+                }
+            ],
+            "description": "Configure, build, test, and package Linux x64 Clang Ninja Debug"
+        },
+        {
+            "name": "linux-x64-clang-ninja-release",
+            "displayName": "Linux x64 Clang Ninja Release",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "linux-x64-clang-ninja-release"
+                },
+                {
+                    "type": "build",
+                    "name": "linux-x64-clang-ninja-release"
+                },
+                {
+                    "type": "test",
+                    "name": "linux-x64-clang-ninja-release"
+                },
+                {
+                    "type": "package",
+                    "name": "linux-x64-clang-ninja-release"
+                }
+            ],
+            "description": "Configure, build, test, and package Linux x64 Clang Ninja Release"
+        },
+        {
+            "name": "linux-x64-clang-make-debug",
+            "displayName": "Linux x64 Clang Unix Makefiles Debug",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "linux-x64-clang-make-debug"
+                },
+                {
+                    "type": "build",
+                    "name": "linux-x64-clang-make-debug"
+                },
+                {
+                    "type": "test",
+                    "name": "linux-x64-clang-make-debug"
+                },
+                {
+                    "type": "package",
+                    "name": "linux-x64-clang-make-debug"
+                }
+            ],
+            "description": "Configure, build, test, and package Linux x64 Clang Unix Makefiles Debug"
+        },
+        {
+            "name": "linux-x64-clang-make-release",
+            "displayName": "Linux x64 Clang Unix Makefiles Release",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "linux-x64-clang-make-release"
+                },
+                {
+                    "type": "build",
+                    "name": "linux-x64-clang-make-release"
+                },
+                {
+                    "type": "test",
+                    "name": "linux-x64-clang-make-release"
+                },
+                {
+                    "type": "package",
+                    "name": "linux-x64-clang-make-release"
+                }
+            ],
+            "description": "Configure, build, test, and package Linux x64 Clang Unix Makefiles Release"
+        },
+        {
+            "name": "linux-arm64-gcc-ninja-debug",
+            "displayName": "Linux ARM64 GCC Ninja Debug",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "linux-arm64-gcc-ninja-debug"
+                },
+                {
+                    "type": "build",
+                    "name": "linux-arm64-gcc-ninja-debug"
+                },
+                {
+                    "type": "test",
+                    "name": "linux-arm64-gcc-ninja-debug"
+                },
+                {
+                    "type": "package",
+                    "name": "linux-arm64-gcc-ninja-debug"
+                }
+            ],
+            "description": "Configure, build, test, and package Linux ARM64 GCC Ninja Debug"
+        },
+        {
+            "name": "linux-arm64-gcc-ninja-release",
+            "displayName": "Linux ARM64 GCC Ninja Release",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "linux-arm64-gcc-ninja-release"
+                },
+                {
+                    "type": "build",
+                    "name": "linux-arm64-gcc-ninja-release"
+                },
+                {
+                    "type": "test",
+                    "name": "linux-arm64-gcc-ninja-release"
+                },
+                {
+                    "type": "package",
+                    "name": "linux-arm64-gcc-ninja-release"
+                }
+            ],
+            "description": "Configure, build, test, and package Linux ARM64 GCC Ninja Release"
+        },
+        {
+            "name": "linux-arm64-gcc-make-debug",
+            "displayName": "Linux ARM64 GCC Unix Makefiles Debug",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "linux-arm64-gcc-make-debug"
+                },
+                {
+                    "type": "build",
+                    "name": "linux-arm64-gcc-make-debug"
+                },
+                {
+                    "type": "test",
+                    "name": "linux-arm64-gcc-make-debug"
+                },
+                {
+                    "type": "package",
+                    "name": "linux-arm64-gcc-make-debug"
+                }
+            ],
+            "description": "Configure, build, test, and package Linux ARM64 GCC Unix Makefiles Debug"
+        },
+        {
+            "name": "linux-arm64-gcc-make-release",
+            "displayName": "Linux ARM64 GCC Unix Makefiles Release",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "linux-arm64-gcc-make-release"
+                },
+                {
+                    "type": "build",
+                    "name": "linux-arm64-gcc-make-release"
+                },
+                {
+                    "type": "test",
+                    "name": "linux-arm64-gcc-make-release"
+                },
+                {
+                    "type": "package",
+                    "name": "linux-arm64-gcc-make-release"
+                }
+            ],
+            "description": "Configure, build, test, and package Linux ARM64 GCC Unix Makefiles Release"
+        },
+        {
+            "name": "linux-arm64-clang-ninja-debug",
+            "displayName": "Linux ARM64 Clang Ninja Debug",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "linux-arm64-clang-ninja-debug"
+                },
+                {
+                    "type": "build",
+                    "name": "linux-arm64-clang-ninja-debug"
+                },
+                {
+                    "type": "test",
+                    "name": "linux-arm64-clang-ninja-debug"
+                },
+                {
+                    "type": "package",
+                    "name": "linux-arm64-clang-ninja-debug"
+                }
+            ],
+            "description": "Configure, build, test, and package Linux ARM64 Clang Ninja Debug"
+        },
+        {
+            "name": "linux-arm64-clang-ninja-release",
+            "displayName": "Linux ARM64 Clang Ninja Release",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "linux-arm64-clang-ninja-release"
+                },
+                {
+                    "type": "build",
+                    "name": "linux-arm64-clang-ninja-release"
+                },
+                {
+                    "type": "test",
+                    "name": "linux-arm64-clang-ninja-release"
+                },
+                {
+                    "type": "package",
+                    "name": "linux-arm64-clang-ninja-release"
+                }
+            ],
+            "description": "Configure, build, test, and package Linux ARM64 Clang Ninja Release"
+        },
+        {
+            "name": "linux-arm64-clang-make-debug",
+            "displayName": "Linux ARM64 Clang Unix Makefiles Debug",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "linux-arm64-clang-make-debug"
+                },
+                {
+                    "type": "build",
+                    "name": "linux-arm64-clang-make-debug"
+                },
+                {
+                    "type": "test",
+                    "name": "linux-arm64-clang-make-debug"
+                },
+                {
+                    "type": "package",
+                    "name": "linux-arm64-clang-make-debug"
+                }
+            ],
+            "description": "Configure, build, test, and package Linux ARM64 Clang Unix Makefiles Debug"
+        },
+        {
+            "name": "linux-arm64-clang-make-release",
+            "displayName": "Linux ARM64 Clang Unix Makefiles Release",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "linux-arm64-clang-make-release"
+                },
+                {
+                    "type": "build",
+                    "name": "linux-arm64-clang-make-release"
+                },
+                {
+                    "type": "test",
+                    "name": "linux-arm64-clang-make-release"
+                },
+                {
+                    "type": "package",
+                    "name": "linux-arm64-clang-make-release"
+                }
+            ],
+            "description": "Configure, build, test, and package Linux ARM64 Clang Unix Makefiles Release"
+        },
+        {
+            "name": "macos-x64-clang-ninja-debug",
+            "displayName": "macOS x64 Clang Ninja Debug",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "macos-x64-clang-ninja-debug"
+                },
+                {
+                    "type": "build",
+                    "name": "macos-x64-clang-ninja-debug"
+                },
+                {
+                    "type": "test",
+                    "name": "macos-x64-clang-ninja-debug"
+                },
+                {
+                    "type": "package",
+                    "name": "macos-x64-clang-ninja-debug"
+                }
+            ],
+            "description": "Configure, build, test, and package macOS x64 Clang Ninja Debug"
+        },
+        {
+            "name": "macos-x64-clang-ninja-release",
+            "displayName": "macOS x64 Clang Ninja Release",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "macos-x64-clang-ninja-release"
+                },
+                {
+                    "type": "build",
+                    "name": "macos-x64-clang-ninja-release"
+                },
+                {
+                    "type": "test",
+                    "name": "macos-x64-clang-ninja-release"
+                },
+                {
+                    "type": "package",
+                    "name": "macos-x64-clang-ninja-release"
+                }
+            ],
+            "description": "Configure, build, test, and package macOS x64 Clang Ninja Release"
+        },
+        {
+            "name": "macos-x64-clang-xcode-debug",
+            "displayName": "macOS x64 Clang Xcode Debug",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "macos-x64-clang-xcode"
+                },
+                {
+                    "type": "build",
+                    "name": "macos-x64-clang-xcode-debug"
+                },
+                {
+                    "type": "test",
+                    "name": "macos-x64-clang-xcode-debug"
+                },
+                {
+                    "type": "package",
+                    "name": "macos-x64-clang-xcode-debug"
+                }
+            ],
+            "description": "Configure, build, test, and package macOS x64 Clang Xcode Debug"
+        },
+        {
+            "name": "macos-x64-clang-xcode-release",
+            "displayName": "macOS x64 Clang Xcode Release",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "macos-x64-clang-xcode"
+                },
+                {
+                    "type": "build",
+                    "name": "macos-x64-clang-xcode-release"
+                },
+                {
+                    "type": "test",
+                    "name": "macos-x64-clang-xcode-release"
+                },
+                {
+                    "type": "package",
+                    "name": "macos-x64-clang-xcode-release"
+                }
+            ],
+            "description": "Configure, build, test, and package macOS x64 Clang Xcode Release"
+        },
+        {
+            "name": "macos-arm64-clang-ninja-debug",
+            "displayName": "macOS ARM64 Clang Ninja Debug",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "macos-arm64-clang-ninja-debug"
+                },
+                {
+                    "type": "build",
+                    "name": "macos-arm64-clang-ninja-debug"
+                },
+                {
+                    "type": "test",
+                    "name": "macos-arm64-clang-ninja-debug"
+                },
+                {
+                    "type": "package",
+                    "name": "macos-arm64-clang-ninja-debug"
+                }
+            ],
+            "description": "Configure, build, test, and package macOS ARM64 Clang Ninja Debug"
+        },
+        {
+            "name": "macos-arm64-clang-ninja-release",
+            "displayName": "macOS ARM64 Clang Ninja Release",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "macos-arm64-clang-ninja-release"
+                },
+                {
+                    "type": "build",
+                    "name": "macos-arm64-clang-ninja-release"
+                },
+                {
+                    "type": "test",
+                    "name": "macos-arm64-clang-ninja-release"
+                },
+                {
+                    "type": "package",
+                    "name": "macos-arm64-clang-ninja-release"
+                }
+            ],
+            "description": "Configure, build, test, and package macOS ARM64 Clang Ninja Release"
+        },
+        {
+            "name": "macos-arm64-clang-xcode-debug",
+            "displayName": "macOS ARM64 Clang Xcode Debug",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "macos-arm64-clang-xcode"
+                },
+                {
+                    "type": "build",
+                    "name": "macos-arm64-clang-xcode-debug"
+                },
+                {
+                    "type": "test",
+                    "name": "macos-arm64-clang-xcode-debug"
+                },
+                {
+                    "type": "package",
+                    "name": "macos-arm64-clang-xcode-debug"
+                }
+            ],
+            "description": "Configure, build, test, and package macOS ARM64 Clang Xcode Debug"
+        },
+        {
+            "name": "macos-arm64-clang-xcode-release",
+            "displayName": "macOS ARM64 Clang Xcode Release",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "macos-arm64-clang-xcode"
+                },
+                {
+                    "type": "build",
+                    "name": "macos-arm64-clang-xcode-release"
+                },
+                {
+                    "type": "test",
+                    "name": "macos-arm64-clang-xcode-release"
+                },
+                {
+                    "type": "package",
+                    "name": "macos-arm64-clang-xcode-release"
+                }
+            ],
+            "description": "Configure, build, test, and package macOS ARM64 Clang Xcode Release"
+        }
+    ]
+}
