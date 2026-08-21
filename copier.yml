@@ -17,7 +17,7 @@ _message_after_copy: |
 
     cd "{{ _copier_conf.dst_path }}"
     git init
-    cmake --workflow --preset <preset>
+    cmake --workflow --preset {% if 'windows' in platforms and 'x64' in architectures and 'msvc' in windows_compilers %}windows-x64-msvc-vs2022-debug{% elif 'windows' in platforms and 'x64' in architectures and 'clang-cl' in windows_compilers %}windows-x64-clang-cl-ninja-debug{% elif 'windows' in platforms and 'x64' in architectures and 'clang' in windows_compilers %}windows-x64-clang-ninja-debug{% elif 'windows' in platforms and 'arm64' in architectures and 'msvc' in windows_compilers %}windows-arm64-msvc-vs2022-debug{% elif 'windows' in platforms and 'arm64' in architectures and 'clang-cl' in windows_compilers %}windows-arm64-clang-cl-ninja-debug{% elif 'windows' in platforms and 'arm64' in architectures and 'clang' in windows_compilers %}windows-arm64-clang-ninja-debug{% elif 'linux' in platforms and 'x64' in architectures and 'gcc' in linux_compilers and 'ninja' in linux_generators %}linux-x64-gcc-ninja-debug{% elif 'linux' in platforms and 'x64' in architectures and 'gcc' in linux_compilers and 'make' in linux_generators %}linux-x64-gcc-make-debug{% elif 'linux' in platforms and 'x64' in architectures and 'clang' in linux_compilers and 'ninja' in linux_generators %}linux-x64-clang-ninja-debug{% elif 'linux' in platforms and 'x64' in architectures and 'clang' in linux_compilers and 'make' in linux_generators %}linux-x64-clang-make-debug{% elif 'linux' in platforms and 'arm64' in architectures and 'gcc' in linux_compilers and 'ninja' in linux_generators %}linux-arm64-gcc-ninja-debug{% elif 'linux' in platforms and 'arm64' in architectures and 'gcc' in linux_compilers and 'make' in linux_generators %}linux-arm64-gcc-make-debug{% elif 'linux' in platforms and 'arm64' in architectures and 'clang' in linux_compilers and 'ninja' in linux_generators %}linux-arm64-clang-ninja-debug{% elif 'linux' in platforms and 'arm64' in architectures and 'clang' in linux_compilers and 'make' in linux_generators %}linux-arm64-clang-make-debug{% elif 'macos' in platforms and 'arm64' in architectures and 'clang' in macos_compilers and 'ninja' in macos_generators %}macos-arm64-clang-ninja-debug{% elif 'macos' in platforms and 'x64' in architectures and 'clang' in macos_compilers and 'ninja' in macos_generators %}macos-x64-clang-ninja-debug{% elif 'macos' in platforms and 'x64' in architectures and 'clang' in macos_compilers and 'xcode' in macos_generators %}macos-x64-clang-xcode-debug{% elif 'macos' in platforms and 'arm64' in architectures and 'clang' in macos_compilers and 'xcode' in macos_generators %}macos-arm64-clang-xcode-debug{% endif %}
   {%- if use_vcpkg %}
 
   vcpkg 清单由 _tasks 自动创建（看 VCPKG_ROOT，不要求在 PATH 里）。
@@ -167,6 +167,97 @@ cxx_standard:
     - "20"
     - "23"
   default: "23"
+
+platforms:
+  type: str
+  help: 目标操作系统（决定生成哪些 toolchain 与 CMake preset）
+  multiselect: true
+  choices:
+    Windows: windows
+    Linux: linux
+    macOS: macos
+  default:
+    - windows
+    - linux
+    - macos
+  validator: "{% if not platforms %}至少选择一个目标系统{% endif %}"
+
+architectures:
+  type: str
+  help: 目标架构
+  multiselect: true
+  choices:
+    x64: x64
+    ARM64: arm64
+  default:
+    - x64
+    - arm64
+  validator: "{% if not architectures %}至少选择一个架构{% endif %}"
+
+windows_compilers:
+  type: str
+  help: Windows 编译器
+  multiselect: true
+  when: "{{ 'windows' in platforms }}"
+  choices:
+    MSVC: msvc
+    Clang: clang
+    clang-cl: clang-cl
+  default:
+    - msvc
+    - clang
+    - clang-cl
+  validator: "{% if not windows_compilers %}至少选择一个 Windows 编译器{% endif %}"
+
+linux_compilers:
+  type: str
+  help: Linux 编译器
+  multiselect: true
+  when: "{{ 'linux' in platforms }}"
+  choices:
+    GCC: gcc
+    Clang: clang
+  default:
+    - gcc
+    - clang
+  validator: "{% if not linux_compilers %}至少选择一个 Linux 编译器{% endif %}"
+
+macos_compilers:
+  type: str
+  help: macOS 编译器
+  multiselect: true
+  when: "{{ 'macos' in platforms }}"
+  choices:
+    Clang: clang
+  default:
+    - clang
+  validator: "{% if not macos_compilers %}至少选择一个 macOS 编译器{% endif %}"
+
+linux_generators:
+  type: str
+  help: Linux CMake 生成器
+  multiselect: true
+  when: "{{ 'linux' in platforms }}"
+  choices:
+    Ninja: ninja
+    Unix Makefiles: make
+  default:
+    - ninja
+    - make
+  validator: "{% if not linux_generators %}至少选择一个 Linux 生成器{% endif %}"
+
+macos_generators:
+  type: str
+  help: macOS CMake 生成器
+  multiselect: true
+  when: "{{ 'macos' in platforms }}"
+  choices:
+    Ninja: ninja
+    Xcode: xcode
+  default:
+    - ninja
+    - xcode
+  validator: "{% if not macos_generators %}至少选择一个 macOS 生成器{% endif %}"
 
 license:
   type: str

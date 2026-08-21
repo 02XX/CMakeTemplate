@@ -1,0 +1,13 @@
+add_executable(
+    CoreTests
+    Core.cpp
+)
+target_link_libraries(
+    CoreTests
+    PRIVATE
+        tmp::Core
+        GTest::gtest_main
+)
+project_set_warnings(CoreTests)
+project_enable_sanitizers(CoreTests)
+gtest_discover_tests(CoreTests)

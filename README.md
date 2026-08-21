@@ -4,14 +4,15 @@
 
 生成出的项目自带：
 
-- CMake 3.31+ 与 `CMakePresets.json`（Windows / Linux / macOS，MSVC / Clang / GCC）
-- 按目标平台拆分的 toolchain 文件
+- CMake 3.31+ 与 `CMakePresets.json`
+- Copier 问卷：目标系统、架构、编译器，以及 Linux/macOS 生成器（Windows 不单独问生成器：MSVC → VS2022，Clang / clang-cl → Ninja）。默认全选，生成当前全套 toolchain 与 preset；只选子集则只生成对应文件、preset 和 CI/CD job。macOS 也会询问编译器（目前仅 Clang）
+- 按所选组合拆分的 toolchain 文件
 - 可选 vcpkg（Presets/CI 接 toolchain；`vcpkg.json` 由 `--trust` 后的 `_tasks` 通过 `VCPKG_ROOT` 调用 `vcpkg new` 创建）
 - clang-format / clang-tidy
 - `include/<工程名>/`、`src/<模块>/`、`apps/<Name>/`
 - `#include <MEngine/Module.hpp>`（vcpkg 名用小写 `project_slug`）
 - GoogleTest + CTest（`tests/Unit`、`tests/Integration`）
-- 可选 GitHub Actions CI
+- 可选 GitHub Actions：CI 配置/编译/测试，CD 在 tag 上打包发布
 
 ## 依赖
 
@@ -61,6 +62,8 @@ copier update
 ```
 
 模板使用语义化 Git tag（`vX.Y.Z`）作为版本。请给本仓库打 tag，生成项目才能锁定并升级模板版本。
+
+`copier update` 会询问新增的系统 / 架构 / 编译器 / 生成器问题。全部保持默认即可保留原先的全量 toolchain 与 preset；若改选子集，更新可能删除未选组合的文件与 preset 条目。
 
 ## 测试模板
 

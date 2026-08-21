@@ -11,3 +11,6 @@ uv.lock
 .vscode/
 *.rej
 *.tmp
+.agents
+.cursor
+openspec

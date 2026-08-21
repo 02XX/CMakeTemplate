@@ -1,16 +1,20 @@
-name: CI
+name: CD
 
 on:
   push:
-    branches: [main, master]
-  pull_request:
+    tags:
+      - "v*"
+  workflow_dispatch:
 
 concurrency:
   group: ${{ '{{' }} github.workflow {{ '}}' }}-${{ '{{' }} github.ref {{ '}}' }}
   cancel-in-progress: true
 
+permissions:
+  contents: write
+
 jobs:
-  build:
+  package:
     name: ${{ '{{' }} matrix.name {{ '}}' }}
     runs-on: ${{ '{{' }} matrix.os {{ '}}' }}
     strategy:
@@ -20,77 +24,77 @@ jobs:
 {%- if 'windows' in platforms and 'x64' in architectures and 'msvc' in windows_compilers %}
           - name: Windows MSVC
             os: windows-latest
-            preset: windows-x64-msvc-vs2022-debug
+            preset: windows-x64-msvc-vs2022-release
 {%- elif 'windows' in platforms and 'x64' in architectures and 'clang-cl' in windows_compilers %}
           - name: Windows
             os: windows-latest
-            preset: windows-x64-clang-cl-ninja-debug
+            preset: windows-x64-clang-cl-ninja-release
 {%- elif 'windows' in platforms and 'x64' in architectures and 'clang' in windows_compilers %}
           - name: Windows
             os: windows-latest
-            preset: windows-x64-clang-ninja-debug
+            preset: windows-x64-clang-ninja-release
 {%- elif 'windows' in platforms and 'arm64' in architectures and 'msvc' in windows_compilers %}
           - name: Windows
             os: windows-latest
-            preset: windows-arm64-msvc-vs2022-debug
+            preset: windows-arm64-msvc-vs2022-release
 {%- elif 'windows' in platforms and 'arm64' in architectures and 'clang-cl' in windows_compilers %}
           - name: Windows
             os: windows-latest
-            preset: windows-arm64-clang-cl-ninja-debug
+            preset: windows-arm64-clang-cl-ninja-release
 {%- elif 'windows' in platforms and 'arm64' in architectures and 'clang' in windows_compilers %}
           - name: Windows
             os: windows-latest
-            preset: windows-arm64-clang-ninja-debug
+            preset: windows-arm64-clang-ninja-release
 {%- endif %}
 {%- if 'linux' in platforms and 'x64' in architectures and 'gcc' in linux_compilers and 'ninja' in linux_generators %}
           - name: Linux GCC
             os: ubuntu-latest
-            preset: linux-x64-gcc-ninja-debug
+            preset: linux-x64-gcc-ninja-release
 {%- elif 'linux' in platforms and 'x64' in architectures and 'gcc' in linux_compilers and 'make' in linux_generators %}
           - name: Linux
             os: ubuntu-latest
-            preset: linux-x64-gcc-make-debug
+            preset: linux-x64-gcc-make-release
 {%- elif 'linux' in platforms and 'x64' in architectures and 'clang' in linux_compilers and 'ninja' in linux_generators %}
           - name: Linux
             os: ubuntu-latest
-            preset: linux-x64-clang-ninja-debug
+            preset: linux-x64-clang-ninja-release
 {%- elif 'linux' in platforms and 'x64' in architectures and 'clang' in linux_compilers and 'make' in linux_generators %}
           - name: Linux
             os: ubuntu-latest
-            preset: linux-x64-clang-make-debug
+            preset: linux-x64-clang-make-release
 {%- elif 'linux' in platforms and 'arm64' in architectures and 'gcc' in linux_compilers and 'ninja' in linux_generators %}
           - name: Linux
             os: ubuntu-latest
-            preset: linux-arm64-gcc-ninja-debug
+            preset: linux-arm64-gcc-ninja-release
 {%- elif 'linux' in platforms and 'arm64' in architectures and 'gcc' in linux_compilers and 'make' in linux_generators %}
           - name: Linux
             os: ubuntu-latest
-            preset: linux-arm64-gcc-make-debug
+            preset: linux-arm64-gcc-make-release
 {%- elif 'linux' in platforms and 'arm64' in architectures and 'clang' in linux_compilers and 'ninja' in linux_generators %}
           - name: Linux
             os: ubuntu-latest
-            preset: linux-arm64-clang-ninja-debug
+            preset: linux-arm64-clang-ninja-release
 {%- elif 'linux' in platforms and 'arm64' in architectures and 'clang' in linux_compilers and 'make' in linux_generators %}
           - name: Linux
             os: ubuntu-latest
-            preset: linux-arm64-clang-make-debug
+            preset: linux-arm64-clang-make-release
 {%- endif %}
 {%- if 'macos' in platforms and 'arm64' in architectures and 'clang' in macos_compilers and 'ninja' in macos_generators %}
           - name: macOS Clang
             os: macos-latest
-            preset: macos-arm64-clang-ninja-debug
+            preset: macos-arm64-clang-ninja-release
 {%- elif 'macos' in platforms and 'x64' in architectures and 'clang' in macos_compilers and 'ninja' in macos_generators %}
           - name: macOS
             os: macos-latest
-            preset: macos-x64-clang-ninja-debug
+            preset: macos-x64-clang-ninja-release
 {%- elif 'macos' in platforms and 'x64' in architectures and 'clang' in macos_compilers and 'xcode' in macos_generators %}
           - name: macOS
             os: macos-latest
-            preset: macos-x64-clang-xcode-debug
+            preset: macos-x64-clang-xcode-release
 {%- elif 'macos' in platforms and 'arm64' in architectures and 'clang' in macos_compilers and 'xcode' in macos_generators %}
           - name: macOS
             os: macos-latest
-            preset: macos-arm64-clang-xcode-debug
+            preset: macos-arm64-clang-xcode-release
 {%- endif %}
 
     steps:
@@ -105,3 +109,18 @@ jobs:
       - uses: lukka/run-cmake@v10.9
         with:
           workflowPreset: ${{ '{{' }} matrix.preset {{ '}}' }}
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ '{{' }} matrix.name {{ '}}' }}
+          path: |
+            build/**/*.zip
+            build/**/*.tar.gz
+          if-no-files-found: error
+
+      - if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            build/**/*.zip
+            build/**/*.tar.gz
