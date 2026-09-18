@@ -24,7 +24,7 @@ jobs:
 {%- if 'windows' in platforms and 'x64' in architectures and 'msvc' in windows_compilers %}
           - name: Windows MSVC
             os: windows-latest
-            preset: windows-x64-msvc-vs2022-release
+            preset: windows-x64-msvc-vs-release
 {%- elif 'windows' in platforms and 'x64' in architectures and 'clang-cl' in windows_compilers %}
           - name: Windows
             os: windows-latest
@@ -36,7 +36,7 @@ jobs:
 {%- elif 'windows' in platforms and 'arm64' in architectures and 'msvc' in windows_compilers %}
           - name: Windows
             os: windows-latest
-            preset: windows-arm64-msvc-vs2022-release
+            preset: windows-arm64-msvc-vs-release
 {%- elif 'windows' in platforms and 'arm64' in architectures and 'clang-cl' in windows_compilers %}
           - name: Windows
             os: windows-latest

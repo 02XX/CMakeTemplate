@@ -4,8 +4,8 @@
 
 生成出的项目自带：
 
-- CMake 3.31+ 与 `CMakePresets.json`
-- Copier 问卷：目标系统、架构、编译器，以及 Linux/macOS 生成器（Windows 不单独问生成器：MSVC → VS2022，Clang / clang-cl → Ninja）。默认全选，生成当前全套 toolchain 与 preset；只选子集则只生成对应文件、preset 和 CI/CD job。macOS 也会询问编译器（目前仅 Clang）
+- CMake 3.31+（选择 VS2026 时需 4.2+） 与 `CMakePresets.json`
+- Copier 问卷：目标系统、架构、编译器，以及 Linux/macOS 生成器（Windows 选择 MSVC 后才询问 Visual Studio 版本（2019/2022/2026，默认 2022）：MSVC → Visual Studio，Clang / clang-cl → Ninja）。默认全选，生成当前全套 toolchain 与 preset；只选子集则只生成对应文件、preset 和 CI/CD job。macOS 也会询问编译器（目前仅 Clang）
 - 按所选组合拆分的 toolchain 文件
 - 可选 vcpkg（Presets/CI 接 toolchain；`vcpkg.json` 由 `--trust` 后的 `_tasks` 通过 `VCPKG_ROOT` 调用 `vcpkg new` 创建）
 - clang-format / clang-tidy
@@ -18,7 +18,7 @@
 
 - Python 3.9+
 - [Copier](https://copier.readthedocs.io/) 9.6+
-- CMake 3.31+
+- CMake 3.31+（选择 VS2026 时需 4.2+）
 - 编译器：MSVC、Clang 或 GCC
 - 若启用 vcpkg：安装 [vcpkg](https://vcpkg.io/) 并设置 `VCPKG_ROOT`
 
@@ -40,7 +40,7 @@ uvx copier copy --trust --vcs-ref HEAD https://github.com/02XX/CMakeTemplate.git
 进入生成出的项目后，用 preset 配置、编译、测试、打包：
 
 ```bash
-cmake --workflow --preset windows-x64-msvc-vs2022-debug
+cmake --workflow --preset windows-x64-msvc-vs-debug
 cmake --workflow --preset linux-x64-gcc-ninja-debug
 cmake --workflow --preset macos-arm64-clang-ninja-debug
 ```

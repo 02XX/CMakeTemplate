@@ -1,8 +1,8 @@
 {
     "version": 12,
     "cmakeMinimumRequired": {
-        "major": 3,
-        "minor": 31,
+        "major": {{ 4 if 'windows' in platforms and 'msvc' in windows_compilers and windows_vs_generator == 'Visual Studio 18 2026' else 3 }},
+        "minor": {{ 2 if 'windows' in platforms and 'msvc' in windows_compilers and windows_vs_generator == 'Visual Studio 18 2026' else 31 }},
         "patch": 0
     },
     "configurePresets": [
@@ -17,15 +17,15 @@
                 "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
             }
         }
-{% if use_vcpkg %},
+{%- if use_vcpkg %},
         {
             "name": "vcpkg",
             "description": "Use vcpkg manifest mode as the primary package toolchain",
             "hidden": true,
             "toolchainFile": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
         }
-{% endif %}
-{% if 'windows' in platforms %},
+{%- endif %}
+{%- if 'windows' in platforms %},
         {
             "name": "windows",
             "displayName": "Windows",
@@ -41,8 +41,8 @@
             },
             "description": "Common Windows configuration{% if use_vcpkg %} with vcpkg enabled by default{% endif %}"
         }
-{% endif %}
-{% if 'linux' in platforms %},
+{%- endif %}
+{%- if 'linux' in platforms %},
         {
             "name": "linux",
             "displayName": "Linux",
@@ -58,8 +58,8 @@
             },
             "description": "Common Linux configuration{% if use_vcpkg %} with vcpkg enabled by default{% endif %}"
         }
-{% endif %}
-{% if 'macos' in platforms %},
+{%- endif %}
+{%- if 'macos' in platforms %},
         {
             "name": "macos",
             "displayName": "macOS",
@@ -75,31 +75,31 @@
             },
             "description": "Common macOS configuration{% if use_vcpkg %} with vcpkg enabled by default{% endif %}"
         }
-{% endif %}
-{% if 'windows' in platforms and 'x64' in architectures and 'msvc' in windows_compilers %},
+{%- endif %}
+{%- if 'windows' in platforms and 'x64' in architectures and 'msvc' in windows_compilers %},
         {
-            "name": "windows-x64-msvc-vs2022",
-            "displayName": "Windows x64 MSVC Visual Studio 2022",
+            "name": "windows-x64-msvc-vs",
+            "displayName": "Windows x64 MSVC {{ windows_vs_generator }}",
             "inherits": [
                 "windows"
             ],
-            "generator": "Visual Studio 17 2022",
+            "generator": "{{ windows_vs_generator }}",
             "architecture": {
                 "value": "x64",
                 "strategy": "set"
             },
             "cacheVariables": {
-                {% if use_vcpkg %}
+{%- if use_vcpkg %}
                 "VCPKG_TARGET_TRIPLET": "x64-windows",
                 "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/windows-x64-msvc.cmake"
 {%- else %}
                 "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/windows-x64-msvc.cmake"
 {%- endif %}
             },
-            "description": "Configure Windows x64 MSVC Visual Studio 2022 using {% if use_vcpkg %}vcpkg and {% endif %}the selected target toolchain"
+            "description": "Configure Windows x64 MSVC Visual Studio using {% if use_vcpkg %}vcpkg and {% endif %}the selected target toolchain"
         }
-{% endif %}
-{% if 'windows' in platforms and 'x64' in architectures and 'clang-cl' in windows_compilers %},
+{%- endif %}
+{%- if 'windows' in platforms and 'x64' in architectures and 'clang-cl' in windows_compilers %},
         {
             "name": "windows-x64-clang-cl-ninja-debug",
             "displayName": "Windows x64 Clang-CL Ninja Debug",
@@ -109,7 +109,7 @@
             "generator": "Ninja",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug",
-                {% if use_vcpkg %}
+{%- if use_vcpkg %}
                 "VCPKG_TARGET_TRIPLET": "x64-windows",
                 "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/windows-x64-clang-cl.cmake"
 {%- else %}
@@ -118,8 +118,8 @@
             },
             "description": "Configure Windows x64 Clang-CL Ninja Debug using {% if use_vcpkg %}vcpkg and {% endif %}the selected target toolchain"
         }
-{% endif %}
-{% if 'windows' in platforms and 'x64' in architectures and 'clang-cl' in windows_compilers %},
+{%- endif %}
+{%- if 'windows' in platforms and 'x64' in architectures and 'clang-cl' in windows_compilers %},
         {
             "name": "windows-x64-clang-cl-ninja-release",
             "displayName": "Windows x64 Clang-CL Ninja Release",
@@ -129,7 +129,7 @@
             "generator": "Ninja",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release",
-                {% if use_vcpkg %}
+{%- if use_vcpkg %}
                 "VCPKG_TARGET_TRIPLET": "x64-windows",
                 "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/windows-x64-clang-cl.cmake"
 {%- else %}
@@ -138,8 +138,8 @@
             },
             "description": "Configure Windows x64 Clang-CL Ninja Release using {% if use_vcpkg %}vcpkg and {% endif %}the selected target toolchain"
         }
-{% endif %}
-{% if 'windows' in platforms and 'x64' in architectures and 'clang' in windows_compilers %},
+{%- endif %}
+{%- if 'windows' in platforms and 'x64' in architectures and 'clang' in windows_compilers %},
         {
             "name": "windows-x64-clang-ninja-debug",
             "displayName": "Windows x64 Clang Ninja Debug",
@@ -149,7 +149,7 @@
             "generator": "Ninja",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug",
-                {% if use_vcpkg %}
+{%- if use_vcpkg %}
                 "VCPKG_TARGET_TRIPLET": "x64-windows",
                 "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/windows-x64-clang.cmake"
 {%- else %}
@@ -158,8 +158,8 @@
             },
             "description": "Configure Windows x64 Clang Ninja Debug using {% if use_vcpkg %}vcpkg and {% endif %}the selected target toolchain"
         }
-{% endif %}
-{% if 'windows' in platforms and 'x64' in architectures and 'clang' in windows_compilers %},
+{%- endif %}
+{%- if 'windows' in platforms and 'x64' in architectures and 'clang' in windows_compilers %},
         {
             "name": "windows-x64-clang-ninja-release",
             "displayName": "Windows x64 Clang Ninja Release",
@@ -169,7 +169,7 @@
             "generator": "Ninja",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release",
-                {% if use_vcpkg %}
+{%- if use_vcpkg %}
                 "VCPKG_TARGET_TRIPLET": "x64-windows",
                 "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/windows-x64-clang.cmake"
 {%- else %}
@@ -178,31 +178,31 @@
             },
             "description": "Configure Windows x64 Clang Ninja Release using {% if use_vcpkg %}vcpkg and {% endif %}the selected target toolchain"
         }
-{% endif %}
-{% if 'windows' in platforms and 'arm64' in architectures and 'msvc' in windows_compilers %},
+{%- endif %}
+{%- if 'windows' in platforms and 'arm64' in architectures and 'msvc' in windows_compilers %},
         {
-            "name": "windows-arm64-msvc-vs2022",
-            "displayName": "Windows ARM64 MSVC Visual Studio 2022",
+            "name": "windows-arm64-msvc-vs",
+            "displayName": "Windows ARM64 MSVC {{ windows_vs_generator }}",
             "inherits": [
                 "windows"
             ],
-            "generator": "Visual Studio 17 2022",
+            "generator": "{{ windows_vs_generator }}",
             "architecture": {
                 "value": "arm64",
                 "strategy": "set"
             },
             "cacheVariables": {
-                {% if use_vcpkg %}
+{%- if use_vcpkg %}
                 "VCPKG_TARGET_TRIPLET": "arm64-windows",
                 "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/windows-arm64-msvc.cmake"
 {%- else %}
                 "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/windows-arm64-msvc.cmake"
 {%- endif %}
             },
-            "description": "Configure Windows ARM64 MSVC Visual Studio 2022 using {% if use_vcpkg %}vcpkg and {% endif %}the selected target toolchain"
+            "description": "Configure Windows ARM64 MSVC Visual Studio using {% if use_vcpkg %}vcpkg and {% endif %}the selected target toolchain"
         }
-{% endif %}
-{% if 'windows' in platforms and 'arm64' in architectures and 'clang-cl' in windows_compilers %},
+{%- endif %}
+{%- if 'windows' in platforms and 'arm64' in architectures and 'clang-cl' in windows_compilers %},
         {
             "name": "windows-arm64-clang-cl-ninja-debug",
             "displayName": "Windows ARM64 Clang-CL Ninja Debug",
@@ -212,7 +212,7 @@
             "generator": "Ninja",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug",
-                {% if use_vcpkg %}
+{%- if use_vcpkg %}
                 "VCPKG_TARGET_TRIPLET": "arm64-windows",
                 "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/windows-arm64-clang-cl.cmake"
 {%- else %}
@@ -221,8 +221,8 @@
             },
             "description": "Configure Windows ARM64 Clang-CL Ninja Debug using {% if use_vcpkg %}vcpkg and {% endif %}the selected target toolchain"
         }
-{% endif %}
-{% if 'windows' in platforms and 'arm64' in architectures and 'clang-cl' in windows_compilers %},
+{%- endif %}
+{%- if 'windows' in platforms and 'arm64' in architectures and 'clang-cl' in windows_compilers %},
         {
             "name": "windows-arm64-clang-cl-ninja-release",
             "displayName": "Windows ARM64 Clang-CL Ninja Release",
@@ -232,7 +232,7 @@
             "generator": "Ninja",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release",
-                {% if use_vcpkg %}
+{%- if use_vcpkg %}
                 "VCPKG_TARGET_TRIPLET": "arm64-windows",
                 "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/windows-arm64-clang-cl.cmake"
 {%- else %}
@@ -241,8 +241,8 @@
             },
             "description": "Configure Windows ARM64 Clang-CL Ninja Release using {% if use_vcpkg %}vcpkg and {% endif %}the selected target toolchain"
         }
-{% endif %}
-{% if 'windows' in platforms and 'arm64' in architectures and 'clang' in windows_compilers %},
+{%- endif %}
+{%- if 'windows' in platforms and 'arm64' in architectures and 'clang' in windows_compilers %},
         {
             "name": "windows-arm64-clang-ninja-debug",
             "displayName": "Windows ARM64 Clang Ninja Debug",
@@ -252,7 +252,7 @@
             "generator": "Ninja",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug",
-                {% if use_vcpkg %}
+{%- if use_vcpkg %}
                 "VCPKG_TARGET_TRIPLET": "arm64-windows",
                 "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/windows-arm64-clang.cmake"
 {%- else %}
@@ -261,8 +261,8 @@
             },
             "description": "Configure Windows ARM64 Clang Ninja Debug using {% if use_vcpkg %}vcpkg and {% endif %}the selected target toolchain"
         }
-{% endif %}
-{% if 'windows' in platforms and 'arm64' in architectures and 'clang' in windows_compilers %},
+{%- endif %}
+{%- if 'windows' in platforms and 'arm64' in architectures and 'clang' in windows_compilers %},
         {
             "name": "windows-arm64-clang-ninja-release",
             "displayName": "Windows ARM64 Clang Ninja Release",
@@ -272,7 +272,7 @@
             "generator": "Ninja",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release",
-                {% if use_vcpkg %}
+{%- if use_vcpkg %}
                 "VCPKG_TARGET_TRIPLET": "arm64-windows",
                 "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/windows-arm64-clang.cmake"
 {%- else %}
@@ -281,8 +281,8 @@
             },
             "description": "Configure Windows ARM64 Clang Ninja Release using {% if use_vcpkg %}vcpkg and {% endif %}the selected target toolchain"
         }
-{% endif %}
-{% if 'linux' in platforms and 'x64' in architectures and 'gcc' in linux_compilers and 'ninja' in linux_generators %},
+{%- endif %}
+{%- if 'linux' in platforms and 'x64' in architectures and 'gcc' in linux_compilers and 'ninja' in linux_generators %},
         {
             "name": "linux-x64-gcc-ninja-debug",
             "displayName": "Linux x64 GCC Ninja Debug",
@@ -292,7 +292,7 @@
             "generator": "Ninja",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug",
-                {% if use_vcpkg %}
+{%- if use_vcpkg %}
                 "VCPKG_TARGET_TRIPLET": "x64-linux",
                 "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/linux-x64-gcc.cmake"
 {%- else %}
@@ -301,8 +301,8 @@
             },
             "description": "Configure Linux x64 GCC Ninja Debug using {% if use_vcpkg %}vcpkg and {% endif %}the selected target toolchain"
         }
-{% endif %}
-{% if 'linux' in platforms and 'x64' in architectures and 'gcc' in linux_compilers and 'ninja' in linux_generators %},
+{%- endif %}
+{%- if 'linux' in platforms and 'x64' in architectures and 'gcc' in linux_compilers and 'ninja' in linux_generators %},
         {
             "name": "linux-x64-gcc-ninja-release",
             "displayName": "Linux x64 GCC Ninja Release",
@@ -312,7 +312,7 @@
             "generator": "Ninja",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release",
-                {% if use_vcpkg %}
+{%- if use_vcpkg %}
                 "VCPKG_TARGET_TRIPLET": "x64-linux",
                 "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/linux-x64-gcc.cmake"
 {%- else %}
@@ -321,8 +321,8 @@
             },
             "description": "Configure Linux x64 GCC Ninja Release using {% if use_vcpkg %}vcpkg and {% endif %}the selected target toolchain"
         }
-{% endif %}
-{% if 'linux' in platforms and 'x64' in architectures and 'gcc' in linux_compilers and 'make' in linux_generators %},
+{%- endif %}
+{%- if 'linux' in platforms and 'x64' in architectures and 'gcc' in linux_compilers and 'make' in linux_generators %},
         {
             "name": "linux-x64-gcc-make-debug",
             "displayName": "Linux x64 GCC Unix Makefiles Debug",
@@ -332,7 +332,7 @@
             "generator": "Unix Makefiles",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug",
-                {% if use_vcpkg %}
+{%- if use_vcpkg %}
                 "VCPKG_TARGET_TRIPLET": "x64-linux",
                 "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/linux-x64-gcc.cmake"
 {%- else %}
@@ -341,8 +341,8 @@
             },
             "description": "Configure Linux x64 GCC Unix Makefiles Debug using {% if use_vcpkg %}vcpkg and {% endif %}the selected target toolchain"
         }
-{% endif %}
-{% if 'linux' in platforms and 'x64' in architectures and 'gcc' in linux_compilers and 'make' in linux_generators %},
+{%- endif %}
+{%- if 'linux' in platforms and 'x64' in architectures and 'gcc' in linux_compilers and 'make' in linux_generators %},
         {
             "name": "linux-x64-gcc-make-release",
             "displayName": "Linux x64 GCC Unix Makefiles Release",
@@ -352,7 +352,7 @@
             "generator": "Unix Makefiles",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release",
-                {% if use_vcpkg %}
+{%- if use_vcpkg %}
                 "VCPKG_TARGET_TRIPLET": "x64-linux",
                 "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/linux-x64-gcc.cmake"
 {%- else %}
@@ -361,8 +361,8 @@
             },
             "description": "Configure Linux x64 GCC Unix Makefiles Release using {% if use_vcpkg %}vcpkg and {% endif %}the selected target toolchain"
         }
-{% endif %}
-{% if 'linux' in platforms and 'x64' in architectures and 'clang' in linux_compilers and 'ninja' in linux_generators %},
+{%- endif %}
+{%- if 'linux' in platforms and 'x64' in architectures and 'clang' in linux_compilers and 'ninja' in linux_generators %},
         {
             "name": "linux-x64-clang-ninja-debug",
             "displayName": "Linux x64 Clang Ninja Debug",
@@ -372,7 +372,7 @@
             "generator": "Ninja",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug",
-                {% if use_vcpkg %}
+{%- if use_vcpkg %}
                 "VCPKG_TARGET_TRIPLET": "x64-linux",
                 "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/linux-x64-clang.cmake"
 {%- else %}
@@ -381,8 +381,8 @@
             },
             "description": "Configure Linux x64 Clang Ninja Debug using {% if use_vcpkg %}vcpkg and {% endif %}the selected target toolchain"
         }
-{% endif %}
-{% if 'linux' in platforms and 'x64' in architectures and 'clang' in linux_compilers and 'ninja' in linux_generators %},
+{%- endif %}
+{%- if 'linux' in platforms and 'x64' in architectures and 'clang' in linux_compilers and 'ninja' in linux_generators %},
         {
             "name": "linux-x64-clang-ninja-release",
             "displayName": "Linux x64 Clang Ninja Release",
@@ -392,7 +392,7 @@
             "generator": "Ninja",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release",
-                {% if use_vcpkg %}
+{%- if use_vcpkg %}
                 "VCPKG_TARGET_TRIPLET": "x64-linux",
                 "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/linux-x64-clang.cmake"
 {%- else %}
@@ -401,8 +401,8 @@
             },
             "description": "Configure Linux x64 Clang Ninja Release using {% if use_vcpkg %}vcpkg and {% endif %}the selected target toolchain"
         }
-{% endif %}
-{% if 'linux' in platforms and 'x64' in architectures and 'clang' in linux_compilers and 'make' in linux_generators %},
+{%- endif %}
+{%- if 'linux' in platforms and 'x64' in architectures and 'clang' in linux_compilers and 'make' in linux_generators %},
         {
             "name": "linux-x64-clang-make-debug",
             "displayName": "Linux x64 Clang Unix Makefiles Debug",
@@ -412,7 +412,7 @@
             "generator": "Unix Makefiles",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug",
-                {% if use_vcpkg %}
+{%- if use_vcpkg %}
                 "VCPKG_TARGET_TRIPLET": "x64-linux",
                 "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/linux-x64-clang.cmake"
 {%- else %}
@@ -421,8 +421,8 @@
             },
             "description": "Configure Linux x64 Clang Unix Makefiles Debug using {% if use_vcpkg %}vcpkg and {% endif %}the selected target toolchain"
         }
-{% endif %}
-{% if 'linux' in platforms and 'x64' in architectures and 'clang' in linux_compilers and 'make' in linux_generators %},
+{%- endif %}
+{%- if 'linux' in platforms and 'x64' in architectures and 'clang' in linux_compilers and 'make' in linux_generators %},
         {
             "name": "linux-x64-clang-make-release",
             "displayName": "Linux x64 Clang Unix Makefiles Release",
@@ -432,7 +432,7 @@
             "generator": "Unix Makefiles",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release",
-                {% if use_vcpkg %}
+{%- if use_vcpkg %}
                 "VCPKG_TARGET_TRIPLET": "x64-linux",
                 "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/linux-x64-clang.cmake"
 {%- else %}
@@ -441,8 +441,8 @@
             },
             "description": "Configure Linux x64 Clang Unix Makefiles Release using {% if use_vcpkg %}vcpkg and {% endif %}the selected target toolchain"
         }
-{% endif %}
-{% if 'linux' in platforms and 'arm64' in architectures and 'gcc' in linux_compilers and 'ninja' in linux_generators %},
+{%- endif %}
+{%- if 'linux' in platforms and 'arm64' in architectures and 'gcc' in linux_compilers and 'ninja' in linux_generators %},
         {
             "name": "linux-arm64-gcc-ninja-debug",
             "displayName": "Linux ARM64 GCC Ninja Debug",
@@ -452,7 +452,7 @@
             "generator": "Ninja",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug",
-                {% if use_vcpkg %}
+{%- if use_vcpkg %}
                 "VCPKG_TARGET_TRIPLET": "arm64-linux",
                 "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/linux-arm64-gcc.cmake"
 {%- else %}
@@ -461,8 +461,8 @@
             },
             "description": "Configure Linux ARM64 GCC Ninja Debug using {% if use_vcpkg %}vcpkg and {% endif %}the selected target toolchain"
         }
-{% endif %}
-{% if 'linux' in platforms and 'arm64' in architectures and 'gcc' in linux_compilers and 'ninja' in linux_generators %},
+{%- endif %}
+{%- if 'linux' in platforms and 'arm64' in architectures and 'gcc' in linux_compilers and 'ninja' in linux_generators %},
         {
             "name": "linux-arm64-gcc-ninja-release",
             "displayName": "Linux ARM64 GCC Ninja Release",
@@ -472,7 +472,7 @@
             "generator": "Ninja",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release",
-                {% if use_vcpkg %}
+{%- if use_vcpkg %}
                 "VCPKG_TARGET_TRIPLET": "arm64-linux",
                 "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/linux-arm64-gcc.cmake"
 {%- else %}
@@ -481,8 +481,8 @@
             },
             "description": "Configure Linux ARM64 GCC Ninja Release using {% if use_vcpkg %}vcpkg and {% endif %}the selected target toolchain"
         }
-{% endif %}
-{% if 'linux' in platforms and 'arm64' in architectures and 'gcc' in linux_compilers and 'make' in linux_generators %},
+{%- endif %}
+{%- if 'linux' in platforms and 'arm64' in architectures and 'gcc' in linux_compilers and 'make' in linux_generators %},
         {
             "name": "linux-arm64-gcc-make-debug",
             "displayName": "Linux ARM64 GCC Unix Makefiles Debug",
@@ -492,7 +492,7 @@
             "generator": "Unix Makefiles",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug",
-                {% if use_vcpkg %}
+{%- if use_vcpkg %}
                 "VCPKG_TARGET_TRIPLET": "arm64-linux",
                 "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/linux-arm64-gcc.cmake"
 {%- else %}
@@ -501,8 +501,8 @@
             },
             "description": "Configure Linux ARM64 GCC Unix Makefiles Debug using {% if use_vcpkg %}vcpkg and {% endif %}the selected target toolchain"
         }
-{% endif %}
-{% if 'linux' in platforms and 'arm64' in architectures and 'gcc' in linux_compilers and 'make' in linux_generators %},
+{%- endif %}
+{%- if 'linux' in platforms and 'arm64' in architectures and 'gcc' in linux_compilers and 'make' in linux_generators %},
         {
             "name": "linux-arm64-gcc-make-release",
             "displayName": "Linux ARM64 GCC Unix Makefiles Release",
@@ -512,7 +512,7 @@
             "generator": "Unix Makefiles",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release",
-                {% if use_vcpkg %}
+{%- if use_vcpkg %}
                 "VCPKG_TARGET_TRIPLET": "arm64-linux",
                 "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/linux-arm64-gcc.cmake"
 {%- else %}
@@ -521,8 +521,8 @@
             },
             "description": "Configure Linux ARM64 GCC Unix Makefiles Release using {% if use_vcpkg %}vcpkg and {% endif %}the selected target toolchain"
         }
-{% endif %}
-{% if 'linux' in platforms and 'arm64' in architectures and 'clang' in linux_compilers and 'ninja' in linux_generators %},
+{%- endif %}
+{%- if 'linux' in platforms and 'arm64' in architectures and 'clang' in linux_compilers and 'ninja' in linux_generators %},
         {
             "name": "linux-arm64-clang-ninja-debug",
             "displayName": "Linux ARM64 Clang Ninja Debug",
@@ -532,7 +532,7 @@
             "generator": "Ninja",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug",
-                {% if use_vcpkg %}
+{%- if use_vcpkg %}
                 "VCPKG_TARGET_TRIPLET": "arm64-linux",
                 "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/linux-arm64-clang.cmake"
 {%- else %}
@@ -541,8 +541,8 @@
             },
             "description": "Configure Linux ARM64 Clang Ninja Debug using {% if use_vcpkg %}vcpkg and {% endif %}the selected target toolchain"
         }
-{% endif %}
-{% if 'linux' in platforms and 'arm64' in architectures and 'clang' in linux_compilers and 'ninja' in linux_generators %},
+{%- endif %}
+{%- if 'linux' in platforms and 'arm64' in architectures and 'clang' in linux_compilers and 'ninja' in linux_generators %},
         {
             "name": "linux-arm64-clang-ninja-release",
             "displayName": "Linux ARM64 Clang Ninja Release",
@@ -552,7 +552,7 @@
             "generator": "Ninja",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release",
-                {% if use_vcpkg %}
+{%- if use_vcpkg %}
                 "VCPKG_TARGET_TRIPLET": "arm64-linux",
                 "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/linux-arm64-clang.cmake"
 {%- else %}
@@ -561,8 +561,8 @@
             },
             "description": "Configure Linux ARM64 Clang Ninja Release using {% if use_vcpkg %}vcpkg and {% endif %}the selected target toolchain"
         }
-{% endif %}
-{% if 'linux' in platforms and 'arm64' in architectures and 'clang' in linux_compilers and 'make' in linux_generators %},
+{%- endif %}
+{%- if 'linux' in platforms and 'arm64' in architectures and 'clang' in linux_compilers and 'make' in linux_generators %},
         {
             "name": "linux-arm64-clang-make-debug",
             "displayName": "Linux ARM64 Clang Unix Makefiles Debug",
@@ -572,7 +572,7 @@
             "generator": "Unix Makefiles",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug",
-                {% if use_vcpkg %}
+{%- if use_vcpkg %}
                 "VCPKG_TARGET_TRIPLET": "arm64-linux",
                 "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/linux-arm64-clang.cmake"
 {%- else %}
@@ -581,8 +581,8 @@
             },
             "description": "Configure Linux ARM64 Clang Unix Makefiles Debug using {% if use_vcpkg %}vcpkg and {% endif %}the selected target toolchain"
         }
-{% endif %}
-{% if 'linux' in platforms and 'arm64' in architectures and 'clang' in linux_compilers and 'make' in linux_generators %},
+{%- endif %}
+{%- if 'linux' in platforms and 'arm64' in architectures and 'clang' in linux_compilers and 'make' in linux_generators %},
         {
             "name": "linux-arm64-clang-make-release",
             "displayName": "Linux ARM64 Clang Unix Makefiles Release",
@@ -592,7 +592,7 @@
             "generator": "Unix Makefiles",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release",
-                {% if use_vcpkg %}
+{%- if use_vcpkg %}
                 "VCPKG_TARGET_TRIPLET": "arm64-linux",
                 "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/linux-arm64-clang.cmake"
 {%- else %}
@@ -601,8 +601,8 @@
             },
             "description": "Configure Linux ARM64 Clang Unix Makefiles Release using {% if use_vcpkg %}vcpkg and {% endif %}the selected target toolchain"
         }
-{% endif %}
-{% if 'macos' in platforms and 'x64' in architectures and 'clang' in macos_compilers and 'ninja' in macos_generators %},
+{%- endif %}
+{%- if 'macos' in platforms and 'x64' in architectures and 'clang' in macos_compilers and 'ninja' in macos_generators %},
         {
             "name": "macos-x64-clang-ninja-debug",
             "displayName": "macOS x64 Clang Ninja Debug",
@@ -612,7 +612,7 @@
             "generator": "Ninja",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug",
-                {% if use_vcpkg %}
+{%- if use_vcpkg %}
                 "VCPKG_TARGET_TRIPLET": "x64-osx",
                 "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/macos-x64-clang.cmake"
 {%- else %}
@@ -621,8 +621,8 @@
             },
             "description": "Configure macOS x64 Clang Ninja Debug using {% if use_vcpkg %}vcpkg and {% endif %}the selected target toolchain"
         }
-{% endif %}
-{% if 'macos' in platforms and 'x64' in architectures and 'clang' in macos_compilers and 'ninja' in macos_generators %},
+{%- endif %}
+{%- if 'macos' in platforms and 'x64' in architectures and 'clang' in macos_compilers and 'ninja' in macos_generators %},
         {
             "name": "macos-x64-clang-ninja-release",
             "displayName": "macOS x64 Clang Ninja Release",
@@ -632,7 +632,7 @@
             "generator": "Ninja",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release",
-                {% if use_vcpkg %}
+{%- if use_vcpkg %}
                 "VCPKG_TARGET_TRIPLET": "x64-osx",
                 "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/macos-x64-clang.cmake"
 {%- else %}
@@ -641,8 +641,8 @@
             },
             "description": "Configure macOS x64 Clang Ninja Release using {% if use_vcpkg %}vcpkg and {% endif %}the selected target toolchain"
         }
-{% endif %}
-{% if 'macos' in platforms and 'x64' in architectures and 'clang' in macos_compilers and 'xcode' in macos_generators %},
+{%- endif %}
+{%- if 'macos' in platforms and 'x64' in architectures and 'clang' in macos_compilers and 'xcode' in macos_generators %},
         {
             "name": "macos-x64-clang-xcode",
             "displayName": "macOS x64 Clang Xcode",
@@ -651,7 +651,7 @@
             ],
             "generator": "Xcode",
             "cacheVariables": {
-                {% if use_vcpkg %}
+{%- if use_vcpkg %}
                 "VCPKG_TARGET_TRIPLET": "x64-osx",
                 "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/macos-x64-clang.cmake"
 {%- else %}
@@ -660,8 +660,8 @@
             },
             "description": "Configure macOS x64 Clang Xcode using {% if use_vcpkg %}vcpkg and {% endif %}the selected target toolchain"
         }
-{% endif %}
-{% if 'macos' in platforms and 'arm64' in architectures and 'clang' in macos_compilers and 'ninja' in macos_generators %},
+{%- endif %}
+{%- if 'macos' in platforms and 'arm64' in architectures and 'clang' in macos_compilers and 'ninja' in macos_generators %},
         {
             "name": "macos-arm64-clang-ninja-debug",
             "displayName": "macOS ARM64 Clang Ninja Debug",
@@ -671,7 +671,7 @@
             "generator": "Ninja",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug",
-                {% if use_vcpkg %}
+{%- if use_vcpkg %}
                 "VCPKG_TARGET_TRIPLET": "arm64-osx",
                 "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/macos-arm64-clang.cmake"
 {%- else %}
@@ -680,8 +680,8 @@
             },
             "description": "Configure macOS ARM64 Clang Ninja Debug using {% if use_vcpkg %}vcpkg and {% endif %}the selected target toolchain"
         }
-{% endif %}
-{% if 'macos' in platforms and 'arm64' in architectures and 'clang' in macos_compilers and 'ninja' in macos_generators %},
+{%- endif %}
+{%- if 'macos' in platforms and 'arm64' in architectures and 'clang' in macos_compilers and 'ninja' in macos_generators %},
         {
             "name": "macos-arm64-clang-ninja-release",
             "displayName": "macOS ARM64 Clang Ninja Release",
@@ -691,7 +691,7 @@
             "generator": "Ninja",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release",
-                {% if use_vcpkg %}
+{%- if use_vcpkg %}
                 "VCPKG_TARGET_TRIPLET": "arm64-osx",
                 "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/macos-arm64-clang.cmake"
 {%- else %}
@@ -700,8 +700,8 @@
             },
             "description": "Configure macOS ARM64 Clang Ninja Release using {% if use_vcpkg %}vcpkg and {% endif %}the selected target toolchain"
         }
-{% endif %}
-{% if 'macos' in platforms and 'arm64' in architectures and 'clang' in macos_compilers and 'xcode' in macos_generators %},
+{%- endif %}
+{%- if 'macos' in platforms and 'arm64' in architectures and 'clang' in macos_compilers and 'xcode' in macos_generators %},
         {
             "name": "macos-arm64-clang-xcode",
             "displayName": "macOS ARM64 Clang Xcode",
@@ -710,7 +710,7 @@
             ],
             "generator": "Xcode",
             "cacheVariables": {
-                {% if use_vcpkg %}
+{%- if use_vcpkg %}
                 "VCPKG_TARGET_TRIPLET": "arm64-osx",
                 "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchains/macos-arm64-clang.cmake"
 {%- else %}
@@ -719,7 +719,7 @@
             },
             "description": "Configure macOS ARM64 Clang Xcode using {% if use_vcpkg %}vcpkg and {% endif %}the selected target toolchain"
         }
-{% endif %}
+{%- endif %}
     ],
     "buildPresets": [
         {
@@ -727,7 +727,7 @@
             "hidden": true,
             "description": "Common build settings"
         }
-{% if 'windows' in platforms %},
+{%- if 'windows' in platforms %},
         {
             "name": "windows",
             "displayName": "Windows",
@@ -739,8 +739,8 @@
             },
             "description": "Common Windows build settings"
         }
-{% endif %}
-{% if 'linux' in platforms %},
+{%- endif %}
+{%- if 'linux' in platforms %},
         {
             "name": "linux",
             "displayName": "Linux",
@@ -752,8 +752,8 @@
             },
             "description": "Common Linux build settings"
         }
-{% endif %}
-{% if 'macos' in platforms %},
+{%- endif %}
+{%- if 'macos' in platforms %},
         {
             "name": "macos",
             "displayName": "macOS",
@@ -765,32 +765,32 @@
             },
             "description": "Common macOS build settings"
         }
-{% endif %}
-{% if 'windows' in platforms and 'x64' in architectures and 'msvc' in windows_compilers %},
+{%- endif %}
+{%- if 'windows' in platforms and 'x64' in architectures and 'msvc' in windows_compilers %},
         {
-            "name": "windows-x64-msvc-vs2022-debug",
-            "displayName": "Windows x64 MSVC Visual Studio 2022 Debug",
-            "configurePreset": "windows-x64-msvc-vs2022",
+            "name": "windows-x64-msvc-vs-debug",
+            "displayName": "Windows x64 MSVC Visual Studio Debug",
+            "configurePreset": "windows-x64-msvc-vs",
             "configuration": "Debug",
             "inherits": [
                 "windows"
             ],
-            "description": "Build Windows x64 MSVC Visual Studio 2022 Debug"
+            "description": "Build Windows x64 MSVC Visual Studio Debug"
         }
-{% endif %}
-{% if 'windows' in platforms and 'x64' in architectures and 'msvc' in windows_compilers %},
+{%- endif %}
+{%- if 'windows' in platforms and 'x64' in architectures and 'msvc' in windows_compilers %},
         {
-            "name": "windows-x64-msvc-vs2022-release",
-            "displayName": "Windows x64 MSVC Visual Studio 2022 Release",
-            "configurePreset": "windows-x64-msvc-vs2022",
+            "name": "windows-x64-msvc-vs-release",
+            "displayName": "Windows x64 MSVC Visual Studio Release",
+            "configurePreset": "windows-x64-msvc-vs",
             "configuration": "Release",
             "inherits": [
                 "windows"
             ],
-            "description": "Build Windows x64 MSVC Visual Studio 2022 Release"
+            "description": "Build Windows x64 MSVC Visual Studio Release"
         }
-{% endif %}
-{% if 'windows' in platforms and 'x64' in architectures and 'clang-cl' in windows_compilers %},
+{%- endif %}
+{%- if 'windows' in platforms and 'x64' in architectures and 'clang-cl' in windows_compilers %},
         {
             "name": "windows-x64-clang-cl-ninja-debug",
             "displayName": "Windows x64 Clang-CL Ninja Debug",
@@ -800,8 +800,8 @@
             ],
             "description": "Build Windows x64 Clang-CL Ninja Debug"
         }
-{% endif %}
-{% if 'windows' in platforms and 'x64' in architectures and 'clang-cl' in windows_compilers %},
+{%- endif %}
+{%- if 'windows' in platforms and 'x64' in architectures and 'clang-cl' in windows_compilers %},
         {
             "name": "windows-x64-clang-cl-ninja-release",
             "displayName": "Windows x64 Clang-CL Ninja Release",
@@ -811,8 +811,8 @@
             ],
             "description": "Build Windows x64 Clang-CL Ninja Release"
         }
-{% endif %}
-{% if 'windows' in platforms and 'x64' in architectures and 'clang' in windows_compilers %},
+{%- endif %}
+{%- if 'windows' in platforms and 'x64' in architectures and 'clang' in windows_compilers %},
         {
             "name": "windows-x64-clang-ninja-debug",
             "displayName": "Windows x64 Clang Ninja Debug",
@@ -822,8 +822,8 @@
             ],
             "description": "Build Windows x64 Clang Ninja Debug"
         }
-{% endif %}
-{% if 'windows' in platforms and 'x64' in architectures and 'clang' in windows_compilers %},
+{%- endif %}
+{%- if 'windows' in platforms and 'x64' in architectures and 'clang' in windows_compilers %},
         {
             "name": "windows-x64-clang-ninja-release",
             "displayName": "Windows x64 Clang Ninja Release",
@@ -833,32 +833,32 @@
             ],
             "description": "Build Windows x64 Clang Ninja Release"
         }
-{% endif %}
-{% if 'windows' in platforms and 'arm64' in architectures and 'msvc' in windows_compilers %},
+{%- endif %}
+{%- if 'windows' in platforms and 'arm64' in architectures and 'msvc' in windows_compilers %},
         {
-            "name": "windows-arm64-msvc-vs2022-debug",
-            "displayName": "Windows ARM64 MSVC Visual Studio 2022 Debug",
-            "configurePreset": "windows-arm64-msvc-vs2022",
+            "name": "windows-arm64-msvc-vs-debug",
+            "displayName": "Windows ARM64 MSVC Visual Studio Debug",
+            "configurePreset": "windows-arm64-msvc-vs",
             "configuration": "Debug",
             "inherits": [
                 "windows"
             ],
-            "description": "Build Windows ARM64 MSVC Visual Studio 2022 Debug"
+            "description": "Build Windows ARM64 MSVC Visual Studio Debug"
         }
-{% endif %}
-{% if 'windows' in platforms and 'arm64' in architectures and 'msvc' in windows_compilers %},
+{%- endif %}
+{%- if 'windows' in platforms and 'arm64' in architectures and 'msvc' in windows_compilers %},
         {
-            "name": "windows-arm64-msvc-vs2022-release",
-            "displayName": "Windows ARM64 MSVC Visual Studio 2022 Release",
-            "configurePreset": "windows-arm64-msvc-vs2022",
+            "name": "windows-arm64-msvc-vs-release",
+            "displayName": "Windows ARM64 MSVC Visual Studio Release",
+            "configurePreset": "windows-arm64-msvc-vs",
             "configuration": "Release",
             "inherits": [
                 "windows"
             ],
-            "description": "Build Windows ARM64 MSVC Visual Studio 2022 Release"
+            "description": "Build Windows ARM64 MSVC Visual Studio Release"
         }
-{% endif %}
-{% if 'windows' in platforms and 'arm64' in architectures and 'clang-cl' in windows_compilers %},
+{%- endif %}
+{%- if 'windows' in platforms and 'arm64' in architectures and 'clang-cl' in windows_compilers %},
         {
             "name": "windows-arm64-clang-cl-ninja-debug",
             "displayName": "Windows ARM64 Clang-CL Ninja Debug",
@@ -868,8 +868,8 @@
             ],
             "description": "Build Windows ARM64 Clang-CL Ninja Debug"
         }
-{% endif %}
-{% if 'windows' in platforms and 'arm64' in architectures and 'clang-cl' in windows_compilers %},
+{%- endif %}
+{%- if 'windows' in platforms and 'arm64' in architectures and 'clang-cl' in windows_compilers %},
         {
             "name": "windows-arm64-clang-cl-ninja-release",
             "displayName": "Windows ARM64 Clang-CL Ninja Release",
@@ -879,8 +879,8 @@
             ],
             "description": "Build Windows ARM64 Clang-CL Ninja Release"
         }
-{% endif %}
-{% if 'windows' in platforms and 'arm64' in architectures and 'clang' in windows_compilers %},
+{%- endif %}
+{%- if 'windows' in platforms and 'arm64' in architectures and 'clang' in windows_compilers %},
         {
             "name": "windows-arm64-clang-ninja-debug",
             "displayName": "Windows ARM64 Clang Ninja Debug",
@@ -890,8 +890,8 @@
             ],
             "description": "Build Windows ARM64 Clang Ninja Debug"
         }
-{% endif %}
-{% if 'windows' in platforms and 'arm64' in architectures and 'clang' in windows_compilers %},
+{%- endif %}
+{%- if 'windows' in platforms and 'arm64' in architectures and 'clang' in windows_compilers %},
         {
             "name": "windows-arm64-clang-ninja-release",
             "displayName": "Windows ARM64 Clang Ninja Release",
@@ -901,8 +901,8 @@
             ],
             "description": "Build Windows ARM64 Clang Ninja Release"
         }
-{% endif %}
-{% if 'linux' in platforms and 'x64' in architectures and 'gcc' in linux_compilers and 'ninja' in linux_generators %},
+{%- endif %}
+{%- if 'linux' in platforms and 'x64' in architectures and 'gcc' in linux_compilers and 'ninja' in linux_generators %},
         {
             "name": "linux-x64-gcc-ninja-debug",
             "displayName": "Linux x64 GCC Ninja Debug",
@@ -912,8 +912,8 @@
             ],
             "description": "Build Linux x64 GCC Ninja Debug"
         }
-{% endif %}
-{% if 'linux' in platforms and 'x64' in architectures and 'gcc' in linux_compilers and 'ninja' in linux_generators %},
+{%- endif %}
+{%- if 'linux' in platforms and 'x64' in architectures and 'gcc' in linux_compilers and 'ninja' in linux_generators %},
         {
             "name": "linux-x64-gcc-ninja-release",
             "displayName": "Linux x64 GCC Ninja Release",
@@ -923,8 +923,8 @@
             ],
             "description": "Build Linux x64 GCC Ninja Release"
         }
-{% endif %}
-{% if 'linux' in platforms and 'x64' in architectures and 'gcc' in linux_compilers and 'make' in linux_generators %},
+{%- endif %}
+{%- if 'linux' in platforms and 'x64' in architectures and 'gcc' in linux_compilers and 'make' in linux_generators %},
         {
             "name": "linux-x64-gcc-make-debug",
             "displayName": "Linux x64 GCC Unix Makefiles Debug",
@@ -934,8 +934,8 @@
             ],
             "description": "Build Linux x64 GCC Unix Makefiles Debug"
         }
-{% endif %}
-{% if 'linux' in platforms and 'x64' in architectures and 'gcc' in linux_compilers and 'make' in linux_generators %},
+{%- endif %}
+{%- if 'linux' in platforms and 'x64' in architectures and 'gcc' in linux_compilers and 'make' in linux_generators %},
         {
             "name": "linux-x64-gcc-make-release",
             "displayName": "Linux x64 GCC Unix Makefiles Release",
@@ -945,8 +945,8 @@
             ],
             "description": "Build Linux x64 GCC Unix Makefiles Release"
         }
-{% endif %}
-{% if 'linux' in platforms and 'x64' in architectures and 'clang' in linux_compilers and 'ninja' in linux_generators %},
+{%- endif %}
+{%- if 'linux' in platforms and 'x64' in architectures and 'clang' in linux_compilers and 'ninja' in linux_generators %},
         {
             "name": "linux-x64-clang-ninja-debug",
             "displayName": "Linux x64 Clang Ninja Debug",
@@ -956,8 +956,8 @@
             ],
             "description": "Build Linux x64 Clang Ninja Debug"
         }
-{% endif %}
-{% if 'linux' in platforms and 'x64' in architectures and 'clang' in linux_compilers and 'ninja' in linux_generators %},
+{%- endif %}
+{%- if 'linux' in platforms and 'x64' in architectures and 'clang' in linux_compilers and 'ninja' in linux_generators %},
         {
             "name": "linux-x64-clang-ninja-release",
             "displayName": "Linux x64 Clang Ninja Release",
@@ -967,8 +967,8 @@
             ],
             "description": "Build Linux x64 Clang Ninja Release"
         }
-{% endif %}
-{% if 'linux' in platforms and 'x64' in architectures and 'clang' in linux_compilers and 'make' in linux_generators %},
+{%- endif %}
+{%- if 'linux' in platforms and 'x64' in architectures and 'clang' in linux_compilers and 'make' in linux_generators %},
         {
             "name": "linux-x64-clang-make-debug",
             "displayName": "Linux x64 Clang Unix Makefiles Debug",
@@ -978,8 +978,8 @@
             ],
             "description": "Build Linux x64 Clang Unix Makefiles Debug"
         }
-{% endif %}
-{% if 'linux' in platforms and 'x64' in architectures and 'clang' in linux_compilers and 'make' in linux_generators %},
+{%- endif %}
+{%- if 'linux' in platforms and 'x64' in architectures and 'clang' in linux_compilers and 'make' in linux_generators %},
         {
             "name": "linux-x64-clang-make-release",
             "displayName": "Linux x64 Clang Unix Makefiles Release",
@@ -989,8 +989,8 @@
             ],
             "description": "Build Linux x64 Clang Unix Makefiles Release"
         }
-{% endif %}
-{% if 'linux' in platforms and 'arm64' in architectures and 'gcc' in linux_compilers and 'ninja' in linux_generators %},
+{%- endif %}
+{%- if 'linux' in platforms and 'arm64' in architectures and 'gcc' in linux_compilers and 'ninja' in linux_generators %},
         {
             "name": "linux-arm64-gcc-ninja-debug",
             "displayName": "Linux ARM64 GCC Ninja Debug",
@@ -1000,8 +1000,8 @@
             ],
             "description": "Build Linux ARM64 GCC Ninja Debug"
         }
-{% endif %}
-{% if 'linux' in platforms and 'arm64' in architectures and 'gcc' in linux_compilers and 'ninja' in linux_generators %},
+{%- endif %}
+{%- if 'linux' in platforms and 'arm64' in architectures and 'gcc' in linux_compilers and 'ninja' in linux_generators %},
         {
             "name": "linux-arm64-gcc-ninja-release",
             "displayName": "Linux ARM64 GCC Ninja Release",
@@ -1011,8 +1011,8 @@
             ],
             "description": "Build Linux ARM64 GCC Ninja Release"
         }
-{% endif %}
-{% if 'linux' in platforms and 'arm64' in architectures and 'gcc' in linux_compilers and 'make' in linux_generators %},
+{%- endif %}
+{%- if 'linux' in platforms and 'arm64' in architectures and 'gcc' in linux_compilers and 'make' in linux_generators %},
         {
             "name": "linux-arm64-gcc-make-debug",
             "displayName": "Linux ARM64 GCC Unix Makefiles Debug",
@@ -1022,8 +1022,8 @@
             ],
             "description": "Build Linux ARM64 GCC Unix Makefiles Debug"
         }
-{% endif %}
-{% if 'linux' in platforms and 'arm64' in architectures and 'gcc' in linux_compilers and 'make' in linux_generators %},
+{%- endif %}
+{%- if 'linux' in platforms and 'arm64' in architectures and 'gcc' in linux_compilers and 'make' in linux_generators %},
         {
             "name": "linux-arm64-gcc-make-release",
             "displayName": "Linux ARM64 GCC Unix Makefiles Release",
@@ -1033,8 +1033,8 @@
             ],
             "description": "Build Linux ARM64 GCC Unix Makefiles Release"
         }
-{% endif %}
-{% if 'linux' in platforms and 'arm64' in architectures and 'clang' in linux_compilers and 'ninja' in linux_generators %},
+{%- endif %}
+{%- if 'linux' in platforms and 'arm64' in architectures and 'clang' in linux_compilers and 'ninja' in linux_generators %},
         {
             "name": "linux-arm64-clang-ninja-debug",
             "displayName": "Linux ARM64 Clang Ninja Debug",
@@ -1044,8 +1044,8 @@
             ],
             "description": "Build Linux ARM64 Clang Ninja Debug"
         }
-{% endif %}
-{% if 'linux' in platforms and 'arm64' in architectures and 'clang' in linux_compilers and 'ninja' in linux_generators %},
+{%- endif %}
+{%- if 'linux' in platforms and 'arm64' in architectures and 'clang' in linux_compilers and 'ninja' in linux_generators %},
         {
             "name": "linux-arm64-clang-ninja-release",
             "displayName": "Linux ARM64 Clang Ninja Release",
@@ -1055,8 +1055,8 @@
             ],
             "description": "Build Linux ARM64 Clang Ninja Release"
         }
-{% endif %}
-{% if 'linux' in platforms and 'arm64' in architectures and 'clang' in linux_compilers and 'make' in linux_generators %},
+{%- endif %}
+{%- if 'linux' in platforms and 'arm64' in architectures and 'clang' in linux_compilers and 'make' in linux_generators %},
         {
             "name": "linux-arm64-clang-make-debug",
             "displayName": "Linux ARM64 Clang Unix Makefiles Debug",
@@ -1066,8 +1066,8 @@
             ],
             "description": "Build Linux ARM64 Clang Unix Makefiles Debug"
         }
-{% endif %}
-{% if 'linux' in platforms and 'arm64' in architectures and 'clang' in linux_compilers and 'make' in linux_generators %},
+{%- endif %}
+{%- if 'linux' in platforms and 'arm64' in architectures and 'clang' in linux_compilers and 'make' in linux_generators %},
         {
             "name": "linux-arm64-clang-make-release",
             "displayName": "Linux ARM64 Clang Unix Makefiles Release",
@@ -1077,8 +1077,8 @@
             ],
             "description": "Build Linux ARM64 Clang Unix Makefiles Release"
         }
-{% endif %}
-{% if 'macos' in platforms and 'x64' in architectures and 'clang' in macos_compilers and 'ninja' in macos_generators %},
+{%- endif %}
+{%- if 'macos' in platforms and 'x64' in architectures and 'clang' in macos_compilers and 'ninja' in macos_generators %},
         {
             "name": "macos-x64-clang-ninja-debug",
             "displayName": "macOS x64 Clang Ninja Debug",
@@ -1088,8 +1088,8 @@
             ],
             "description": "Build macOS x64 Clang Ninja Debug"
         }
-{% endif %}
-{% if 'macos' in platforms and 'x64' in architectures and 'clang' in macos_compilers and 'ninja' in macos_generators %},
+{%- endif %}
+{%- if 'macos' in platforms and 'x64' in architectures and 'clang' in macos_compilers and 'ninja' in macos_generators %},
         {
             "name": "macos-x64-clang-ninja-release",
             "displayName": "macOS x64 Clang Ninja Release",
@@ -1099,8 +1099,8 @@
             ],
             "description": "Build macOS x64 Clang Ninja Release"
         }
-{% endif %}
-{% if 'macos' in platforms and 'x64' in architectures and 'clang' in macos_compilers and 'xcode' in macos_generators %},
+{%- endif %}
+{%- if 'macos' in platforms and 'x64' in architectures and 'clang' in macos_compilers and 'xcode' in macos_generators %},
         {
             "name": "macos-x64-clang-xcode-debug",
             "displayName": "macOS x64 Clang Xcode Debug",
@@ -1111,8 +1111,8 @@
             ],
             "description": "Build macOS x64 Clang Xcode Debug"
         }
-{% endif %}
-{% if 'macos' in platforms and 'x64' in architectures and 'clang' in macos_compilers and 'xcode' in macos_generators %},
+{%- endif %}
+{%- if 'macos' in platforms and 'x64' in architectures and 'clang' in macos_compilers and 'xcode' in macos_generators %},
         {
             "name": "macos-x64-clang-xcode-release",
             "displayName": "macOS x64 Clang Xcode Release",
@@ -1123,8 +1123,8 @@
             ],
             "description": "Build macOS x64 Clang Xcode Release"
         }
-{% endif %}
-{% if 'macos' in platforms and 'arm64' in architectures and 'clang' in macos_compilers and 'ninja' in macos_generators %},
+{%- endif %}
+{%- if 'macos' in platforms and 'arm64' in architectures and 'clang' in macos_compilers and 'ninja' in macos_generators %},
         {
             "name": "macos-arm64-clang-ninja-debug",
             "displayName": "macOS ARM64 Clang Ninja Debug",
@@ -1134,8 +1134,8 @@
             ],
             "description": "Build macOS ARM64 Clang Ninja Debug"
         }
-{% endif %}
-{% if 'macos' in platforms and 'arm64' in architectures and 'clang' in macos_compilers and 'ninja' in macos_generators %},
+{%- endif %}
+{%- if 'macos' in platforms and 'arm64' in architectures and 'clang' in macos_compilers and 'ninja' in macos_generators %},
         {
             "name": "macos-arm64-clang-ninja-release",
             "displayName": "macOS ARM64 Clang Ninja Release",
@@ -1145,8 +1145,8 @@
             ],
             "description": "Build macOS ARM64 Clang Ninja Release"
         }
-{% endif %}
-{% if 'macos' in platforms and 'arm64' in architectures and 'clang' in macos_compilers and 'xcode' in macos_generators %},
+{%- endif %}
+{%- if 'macos' in platforms and 'arm64' in architectures and 'clang' in macos_compilers and 'xcode' in macos_generators %},
         {
             "name": "macos-arm64-clang-xcode-debug",
             "displayName": "macOS ARM64 Clang Xcode Debug",
@@ -1157,8 +1157,8 @@
             ],
             "description": "Build macOS ARM64 Clang Xcode Debug"
         }
-{% endif %}
-{% if 'macos' in platforms and 'arm64' in architectures and 'clang' in macos_compilers and 'xcode' in macos_generators %},
+{%- endif %}
+{%- if 'macos' in platforms and 'arm64' in architectures and 'clang' in macos_compilers and 'xcode' in macos_generators %},
         {
             "name": "macos-arm64-clang-xcode-release",
             "displayName": "macOS ARM64 Clang Xcode Release",
@@ -1169,7 +1169,7 @@
             ],
             "description": "Build macOS ARM64 Clang Xcode Release"
         }
-{% endif %}
+{%- endif %}
     ],
     "testPresets": [
         {
@@ -1180,7 +1180,7 @@
             },
             "description": "Common test settings with failure output enabled"
         }
-{% if 'windows' in platforms %},
+{%- if 'windows' in platforms %},
         {
             "name": "windows",
             "displayName": "Windows",
@@ -1195,8 +1195,8 @@
             },
             "description": "Common Windows test settings with failure output enabled"
         }
-{% endif %}
-{% if 'linux' in platforms %},
+{%- endif %}
+{%- if 'linux' in platforms %},
         {
             "name": "linux",
             "displayName": "Linux",
@@ -1211,8 +1211,8 @@
             },
             "description": "Common Linux test settings with failure output enabled"
         }
-{% endif %}
-{% if 'macos' in platforms %},
+{%- endif %}
+{%- if 'macos' in platforms %},
         {
             "name": "macos",
             "displayName": "macOS",
@@ -1227,32 +1227,32 @@
             },
             "description": "Common macOS test settings with failure output enabled"
         }
-{% endif %}
-{% if 'windows' in platforms and 'x64' in architectures and 'msvc' in windows_compilers %},
+{%- endif %}
+{%- if 'windows' in platforms and 'x64' in architectures and 'msvc' in windows_compilers %},
         {
-            "name": "windows-x64-msvc-vs2022-debug",
-            "displayName": "Windows x64 MSVC Visual Studio 2022 Debug",
-            "configurePreset": "windows-x64-msvc-vs2022",
+            "name": "windows-x64-msvc-vs-debug",
+            "displayName": "Windows x64 MSVC Visual Studio Debug",
+            "configurePreset": "windows-x64-msvc-vs",
             "configuration": "Debug",
             "inherits": [
                 "windows"
             ],
-            "description": "Run tests for Windows x64 MSVC Visual Studio 2022 Debug"
+            "description": "Run tests for Windows x64 MSVC Visual Studio Debug"
         }
-{% endif %}
-{% if 'windows' in platforms and 'x64' in architectures and 'msvc' in windows_compilers %},
+{%- endif %}
+{%- if 'windows' in platforms and 'x64' in architectures and 'msvc' in windows_compilers %},
         {
-            "name": "windows-x64-msvc-vs2022-release",
-            "displayName": "Windows x64 MSVC Visual Studio 2022 Release",
-            "configurePreset": "windows-x64-msvc-vs2022",
+            "name": "windows-x64-msvc-vs-release",
+            "displayName": "Windows x64 MSVC Visual Studio Release",
+            "configurePreset": "windows-x64-msvc-vs",
             "configuration": "Release",
             "inherits": [
                 "windows"
             ],
-            "description": "Run tests for Windows x64 MSVC Visual Studio 2022 Release"
+            "description": "Run tests for Windows x64 MSVC Visual Studio Release"
         }
-{% endif %}
-{% if 'windows' in platforms and 'x64' in architectures and 'clang-cl' in windows_compilers %},
+{%- endif %}
+{%- if 'windows' in platforms and 'x64' in architectures and 'clang-cl' in windows_compilers %},
         {
             "name": "windows-x64-clang-cl-ninja-debug",
             "displayName": "Windows x64 Clang-CL Ninja Debug",
@@ -1262,8 +1262,8 @@
             ],
             "description": "Run tests for Windows x64 Clang-CL Ninja Debug"
         }
-{% endif %}
-{% if 'windows' in platforms and 'x64' in architectures and 'clang-cl' in windows_compilers %},
+{%- endif %}
+{%- if 'windows' in platforms and 'x64' in architectures and 'clang-cl' in windows_compilers %},
         {
             "name": "windows-x64-clang-cl-ninja-release",
             "displayName": "Windows x64 Clang-CL Ninja Release",
@@ -1273,8 +1273,8 @@
             ],
             "description": "Run tests for Windows x64 Clang-CL Ninja Release"
         }
-{% endif %}
-{% if 'windows' in platforms and 'x64' in architectures and 'clang' in windows_compilers %},
+{%- endif %}
+{%- if 'windows' in platforms and 'x64' in architectures and 'clang' in windows_compilers %},
         {
             "name": "windows-x64-clang-ninja-debug",
             "displayName": "Windows x64 Clang Ninja Debug",
@@ -1284,8 +1284,8 @@
             ],
             "description": "Run tests for Windows x64 Clang Ninja Debug"
         }
-{% endif %}
-{% if 'windows' in platforms and 'x64' in architectures and 'clang' in windows_compilers %},
+{%- endif %}
+{%- if 'windows' in platforms and 'x64' in architectures and 'clang' in windows_compilers %},
         {
             "name": "windows-x64-clang-ninja-release",
             "displayName": "Windows x64 Clang Ninja Release",
@@ -1295,32 +1295,32 @@
             ],
             "description": "Run tests for Windows x64 Clang Ninja Release"
         }
-{% endif %}
-{% if 'windows' in platforms and 'arm64' in architectures and 'msvc' in windows_compilers %},
+{%- endif %}
+{%- if 'windows' in platforms and 'arm64' in architectures and 'msvc' in windows_compilers %},
         {
-            "name": "windows-arm64-msvc-vs2022-debug",
-            "displayName": "Windows ARM64 MSVC Visual Studio 2022 Debug",
-            "configurePreset": "windows-arm64-msvc-vs2022",
+            "name": "windows-arm64-msvc-vs-debug",
+            "displayName": "Windows ARM64 MSVC Visual Studio Debug",
+            "configurePreset": "windows-arm64-msvc-vs",
             "configuration": "Debug",
             "inherits": [
                 "windows"
             ],
-            "description": "Run tests for Windows ARM64 MSVC Visual Studio 2022 Debug"
+            "description": "Run tests for Windows ARM64 MSVC Visual Studio Debug"
         }
-{% endif %}
-{% if 'windows' in platforms and 'arm64' in architectures and 'msvc' in windows_compilers %},
+{%- endif %}
+{%- if 'windows' in platforms and 'arm64' in architectures and 'msvc' in windows_compilers %},
         {
-            "name": "windows-arm64-msvc-vs2022-release",
-            "displayName": "Windows ARM64 MSVC Visual Studio 2022 Release",
-            "configurePreset": "windows-arm64-msvc-vs2022",
+            "name": "windows-arm64-msvc-vs-release",
+            "displayName": "Windows ARM64 MSVC Visual Studio Release",
+            "configurePreset": "windows-arm64-msvc-vs",
             "configuration": "Release",
             "inherits": [
                 "windows"
             ],
-            "description": "Run tests for Windows ARM64 MSVC Visual Studio 2022 Release"
+            "description": "Run tests for Windows ARM64 MSVC Visual Studio Release"
         }
-{% endif %}
-{% if 'windows' in platforms and 'arm64' in architectures and 'clang-cl' in windows_compilers %},
+{%- endif %}
+{%- if 'windows' in platforms and 'arm64' in architectures and 'clang-cl' in windows_compilers %},
         {
             "name": "windows-arm64-clang-cl-ninja-debug",
             "displayName": "Windows ARM64 Clang-CL Ninja Debug",
@@ -1330,8 +1330,8 @@
             ],
             "description": "Run tests for Windows ARM64 Clang-CL Ninja Debug"
         }
-{% endif %}
-{% if 'windows' in platforms and 'arm64' in architectures and 'clang-cl' in windows_compilers %},
+{%- endif %}
+{%- if 'windows' in platforms and 'arm64' in architectures and 'clang-cl' in windows_compilers %},
         {
             "name": "windows-arm64-clang-cl-ninja-release",
             "displayName": "Windows ARM64 Clang-CL Ninja Release",
@@ -1341,8 +1341,8 @@
             ],
             "description": "Run tests for Windows ARM64 Clang-CL Ninja Release"
         }
-{% endif %}
-{% if 'windows' in platforms and 'arm64' in architectures and 'clang' in windows_compilers %},
+{%- endif %}
+{%- if 'windows' in platforms and 'arm64' in architectures and 'clang' in windows_compilers %},
         {
             "name": "windows-arm64-clang-ninja-debug",
             "displayName": "Windows ARM64 Clang Ninja Debug",
@@ -1352,8 +1352,8 @@
             ],
             "description": "Run tests for Windows ARM64 Clang Ninja Debug"
         }
-{% endif %}
-{% if 'windows' in platforms and 'arm64' in architectures and 'clang' in windows_compilers %},
+{%- endif %}
+{%- if 'windows' in platforms and 'arm64' in architectures and 'clang' in windows_compilers %},
         {
             "name": "windows-arm64-clang-ninja-release",
             "displayName": "Windows ARM64 Clang Ninja Release",
@@ -1363,8 +1363,8 @@
             ],
             "description": "Run tests for Windows ARM64 Clang Ninja Release"
         }
-{% endif %}
-{% if 'linux' in platforms and 'x64' in architectures and 'gcc' in linux_compilers and 'ninja' in linux_generators %},
+{%- endif %}
+{%- if 'linux' in platforms and 'x64' in architectures and 'gcc' in linux_compilers and 'ninja' in linux_generators %},
         {
             "name": "linux-x64-gcc-ninja-debug",
             "displayName": "Linux x64 GCC Ninja Debug",
@@ -1374,8 +1374,8 @@
             ],
             "description": "Run tests for Linux x64 GCC Ninja Debug"
         }
-{% endif %}
-{% if 'linux' in platforms and 'x64' in architectures and 'gcc' in linux_compilers and 'ninja' in linux_generators %},
+{%- endif %}
+{%- if 'linux' in platforms and 'x64' in architectures and 'gcc' in linux_compilers and 'ninja' in linux_generators %},
         {
             "name": "linux-x64-gcc-ninja-release",
             "displayName": "Linux x64 GCC Ninja Release",
@@ -1385,8 +1385,8 @@
             ],
             "description": "Run tests for Linux x64 GCC Ninja Release"
         }
-{% endif %}
-{% if 'linux' in platforms and 'x64' in architectures and 'gcc' in linux_compilers and 'make' in linux_generators %},
+{%- endif %}
+{%- if 'linux' in platforms and 'x64' in architectures and 'gcc' in linux_compilers and 'make' in linux_generators %},
         {
             "name": "linux-x64-gcc-make-debug",
             "displayName": "Linux x64 GCC Unix Makefiles Debug",
@@ -1396,8 +1396,8 @@
             ],
             "description": "Run tests for Linux x64 GCC Unix Makefiles Debug"
         }
-{% endif %}
-{% if 'linux' in platforms and 'x64' in architectures and 'gcc' in linux_compilers and 'make' in linux_generators %},
+{%- endif %}
+{%- if 'linux' in platforms and 'x64' in architectures and 'gcc' in linux_compilers and 'make' in linux_generators %},
         {
             "name": "linux-x64-gcc-make-release",
             "displayName": "Linux x64 GCC Unix Makefiles Release",
@@ -1407,8 +1407,8 @@
             ],
             "description": "Run tests for Linux x64 GCC Unix Makefiles Release"
         }
-{% endif %}
-{% if 'linux' in platforms and 'x64' in architectures and 'clang' in linux_compilers and 'ninja' in linux_generators %},
+{%- endif %}
+{%- if 'linux' in platforms and 'x64' in architectures and 'clang' in linux_compilers and 'ninja' in linux_generators %},
         {
             "name": "linux-x64-clang-ninja-debug",
             "displayName": "Linux x64 Clang Ninja Debug",
@@ -1418,8 +1418,8 @@
             ],
             "description": "Run tests for Linux x64 Clang Ninja Debug"
         }
-{% endif %}
-{% if 'linux' in platforms and 'x64' in architectures and 'clang' in linux_compilers and 'ninja' in linux_generators %},
+{%- endif %}
+{%- if 'linux' in platforms and 'x64' in architectures and 'clang' in linux_compilers and 'ninja' in linux_generators %},
         {
             "name": "linux-x64-clang-ninja-release",
             "displayName": "Linux x64 Clang Ninja Release",
@@ -1429,8 +1429,8 @@
             ],
             "description": "Run tests for Linux x64 Clang Ninja Release"
         }
-{% endif %}
-{% if 'linux' in platforms and 'x64' in architectures and 'clang' in linux_compilers and 'make' in linux_generators %},
+{%- endif %}
+{%- if 'linux' in platforms and 'x64' in architectures and 'clang' in linux_compilers and 'make' in linux_generators %},
         {
             "name": "linux-x64-clang-make-debug",
             "displayName": "Linux x64 Clang Unix Makefiles Debug",
@@ -1440,8 +1440,8 @@
             ],
             "description": "Run tests for Linux x64 Clang Unix Makefiles Debug"
         }
-{% endif %}
-{% if 'linux' in platforms and 'x64' in architectures and 'clang' in linux_compilers and 'make' in linux_generators %},
+{%- endif %}
+{%- if 'linux' in platforms and 'x64' in architectures and 'clang' in linux_compilers and 'make' in linux_generators %},
         {
             "name": "linux-x64-clang-make-release",
             "displayName": "Linux x64 Clang Unix Makefiles Release",
@@ -1451,8 +1451,8 @@
             ],
             "description": "Run tests for Linux x64 Clang Unix Makefiles Release"
         }
-{% endif %}
-{% if 'linux' in platforms and 'arm64' in architectures and 'gcc' in linux_compilers and 'ninja' in linux_generators %},
+{%- endif %}
+{%- if 'linux' in platforms and 'arm64' in architectures and 'gcc' in linux_compilers and 'ninja' in linux_generators %},
         {
             "name": "linux-arm64-gcc-ninja-debug",
             "displayName": "Linux ARM64 GCC Ninja Debug",
@@ -1462,8 +1462,8 @@
             ],
             "description": "Run tests for Linux ARM64 GCC Ninja Debug"
         }
-{% endif %}
-{% if 'linux' in platforms and 'arm64' in architectures and 'gcc' in linux_compilers and 'ninja' in linux_generators %},
+{%- endif %}
+{%- if 'linux' in platforms and 'arm64' in architectures and 'gcc' in linux_compilers and 'ninja' in linux_generators %},
         {
             "name": "linux-arm64-gcc-ninja-release",
             "displayName": "Linux ARM64 GCC Ninja Release",
@@ -1473,8 +1473,8 @@
             ],
             "description": "Run tests for Linux ARM64 GCC Ninja Release"
         }
-{% endif %}
-{% if 'linux' in platforms and 'arm64' in architectures and 'gcc' in linux_compilers and 'make' in linux_generators %},
+{%- endif %}
+{%- if 'linux' in platforms and 'arm64' in architectures and 'gcc' in linux_compilers and 'make' in linux_generators %},
         {
             "name": "linux-arm64-gcc-make-debug",
             "displayName": "Linux ARM64 GCC Unix Makefiles Debug",
@@ -1484,8 +1484,8 @@
             ],
             "description": "Run tests for Linux ARM64 GCC Unix Makefiles Debug"
         }
-{% endif %}
-{% if 'linux' in platforms and 'arm64' in architectures and 'gcc' in linux_compilers and 'make' in linux_generators %},
+{%- endif %}
+{%- if 'linux' in platforms and 'arm64' in architectures and 'gcc' in linux_compilers and 'make' in linux_generators %},
         {
             "name": "linux-arm64-gcc-make-release",
             "displayName": "Linux ARM64 GCC Unix Makefiles Release",
@@ -1495,8 +1495,8 @@
             ],
             "description": "Run tests for Linux ARM64 GCC Unix Makefiles Release"
         }
-{% endif %}
-{% if 'linux' in platforms and 'arm64' in architectures and 'clang' in linux_compilers and 'ninja' in linux_generators %},
+{%- endif %}
+{%- if 'linux' in platforms and 'arm64' in architectures and 'clang' in linux_compilers and 'ninja' in linux_generators %},
         {
             "name": "linux-arm64-clang-ninja-debug",
             "displayName": "Linux ARM64 Clang Ninja Debug",
@@ -1506,8 +1506,8 @@
             ],
             "description": "Run tests for Linux ARM64 Clang Ninja Debug"
         }
-{% endif %}
-{% if 'linux' in platforms and 'arm64' in architectures and 'clang' in linux_compilers and 'ninja' in linux_generators %},
+{%- endif %}
+{%- if 'linux' in platforms and 'arm64' in architectures and 'clang' in linux_compilers and 'ninja' in linux_generators %},
         {
             "name": "linux-arm64-clang-ninja-release",
             "displayName": "Linux ARM64 Clang Ninja Release",
@@ -1517,8 +1517,8 @@
             ],
             "description": "Run tests for Linux ARM64 Clang Ninja Release"
         }
-{% endif %}
-{% if 'linux' in platforms and 'arm64' in architectures and 'clang' in linux_compilers and 'make' in linux_generators %},
+{%- endif %}
+{%- if 'linux' in platforms and 'arm64' in architectures and 'clang' in linux_compilers and 'make' in linux_generators %},
         {
             "name": "linux-arm64-clang-make-debug",
             "displayName": "Linux ARM64 Clang Unix Makefiles Debug",
@@ -1528,8 +1528,8 @@
             ],
             "description": "Run tests for Linux ARM64 Clang Unix Makefiles Debug"
         }
-{% endif %}
-{% if 'linux' in platforms and 'arm64' in architectures and 'clang' in linux_compilers and 'make' in linux_generators %},
+{%- endif %}
+{%- if 'linux' in platforms and 'arm64' in architectures and 'clang' in linux_compilers and 'make' in linux_generators %},
         {
             "name": "linux-arm64-clang-make-release",
             "displayName": "Linux ARM64 Clang Unix Makefiles Release",
@@ -1539,8 +1539,8 @@
             ],
             "description": "Run tests for Linux ARM64 Clang Unix Makefiles Release"
         }
-{% endif %}
-{% if 'macos' in platforms and 'x64' in architectures and 'clang' in macos_compilers and 'ninja' in macos_generators %},
+{%- endif %}
+{%- if 'macos' in platforms and 'x64' in architectures and 'clang' in macos_compilers and 'ninja' in macos_generators %},
         {
             "name": "macos-x64-clang-ninja-debug",
             "displayName": "macOS x64 Clang Ninja Debug",
@@ -1550,8 +1550,8 @@
             ],
             "description": "Run tests for macOS x64 Clang Ninja Debug"
         }
-{% endif %}
-{% if 'macos' in platforms and 'x64' in architectures and 'clang' in macos_compilers and 'ninja' in macos_generators %},
+{%- endif %}
+{%- if 'macos' in platforms and 'x64' in architectures and 'clang' in macos_compilers and 'ninja' in macos_generators %},
         {
             "name": "macos-x64-clang-ninja-release",
             "displayName": "macOS x64 Clang Ninja Release",
@@ -1561,8 +1561,8 @@
             ],
             "description": "Run tests for macOS x64 Clang Ninja Release"
         }
-{% endif %}
-{% if 'macos' in platforms and 'x64' in architectures and 'clang' in macos_compilers and 'xcode' in macos_generators %},
+{%- endif %}
+{%- if 'macos' in platforms and 'x64' in architectures and 'clang' in macos_compilers and 'xcode' in macos_generators %},
         {
             "name": "macos-x64-clang-xcode-debug",
             "displayName": "macOS x64 Clang Xcode Debug",
@@ -1573,8 +1573,8 @@
             ],
             "description": "Run tests for macOS x64 Clang Xcode Debug"
         }
-{% endif %}
-{% if 'macos' in platforms and 'x64' in architectures and 'clang' in macos_compilers and 'xcode' in macos_generators %},
+{%- endif %}
+{%- if 'macos' in platforms and 'x64' in architectures and 'clang' in macos_compilers and 'xcode' in macos_generators %},
         {
             "name": "macos-x64-clang-xcode-release",
             "displayName": "macOS x64 Clang Xcode Release",
@@ -1585,8 +1585,8 @@
             ],
             "description": "Run tests for macOS x64 Clang Xcode Release"
         }
-{% endif %}
-{% if 'macos' in platforms and 'arm64' in architectures and 'clang' in macos_compilers and 'ninja' in macos_generators %},
+{%- endif %}
+{%- if 'macos' in platforms and 'arm64' in architectures and 'clang' in macos_compilers and 'ninja' in macos_generators %},
         {
             "name": "macos-arm64-clang-ninja-debug",
             "displayName": "macOS ARM64 Clang Ninja Debug",
@@ -1596,8 +1596,8 @@
             ],
             "description": "Run tests for macOS ARM64 Clang Ninja Debug"
         }
-{% endif %}
-{% if 'macos' in platforms and 'arm64' in architectures and 'clang' in macos_compilers and 'ninja' in macos_generators %},
+{%- endif %}
+{%- if 'macos' in platforms and 'arm64' in architectures and 'clang' in macos_compilers and 'ninja' in macos_generators %},
         {
             "name": "macos-arm64-clang-ninja-release",
             "displayName": "macOS ARM64 Clang Ninja Release",
@@ -1607,8 +1607,8 @@
             ],
             "description": "Run tests for macOS ARM64 Clang Ninja Release"
         }
-{% endif %}
-{% if 'macos' in platforms and 'arm64' in architectures and 'clang' in macos_compilers and 'xcode' in macos_generators %},
+{%- endif %}
+{%- if 'macos' in platforms and 'arm64' in architectures and 'clang' in macos_compilers and 'xcode' in macos_generators %},
         {
             "name": "macos-arm64-clang-xcode-debug",
             "displayName": "macOS ARM64 Clang Xcode Debug",
@@ -1619,8 +1619,8 @@
             ],
             "description": "Run tests for macOS ARM64 Clang Xcode Debug"
         }
-{% endif %}
-{% if 'macos' in platforms and 'arm64' in architectures and 'clang' in macos_compilers and 'xcode' in macos_generators %},
+{%- endif %}
+{%- if 'macos' in platforms and 'arm64' in architectures and 'clang' in macos_compilers and 'xcode' in macos_generators %},
         {
             "name": "macos-arm64-clang-xcode-release",
             "displayName": "macOS ARM64 Clang Xcode Release",
@@ -1631,7 +1631,7 @@
             ],
             "description": "Run tests for macOS ARM64 Clang Xcode Release"
         }
-{% endif %}
+{%- endif %}
     ],
     "packagePresets": [
         {
@@ -1639,7 +1639,7 @@
             "hidden": true,
             "description": "Common package settings"
         }
-{% if 'windows' in platforms %},
+{%- if 'windows' in platforms %},
         {
             "name": "windows",
             "displayName": "Windows",
@@ -1651,8 +1651,8 @@
             },
             "description": "Common Windows package settings"
         }
-{% endif %}
-{% if 'linux' in platforms %},
+{%- endif %}
+{%- if 'linux' in platforms %},
         {
             "name": "linux",
             "displayName": "Linux",
@@ -1664,8 +1664,8 @@
             },
             "description": "Common Linux package settings"
         }
-{% endif %}
-{% if 'macos' in platforms %},
+{%- endif %}
+{%- if 'macos' in platforms %},
         {
             "name": "macos",
             "displayName": "macOS",
@@ -1677,36 +1677,36 @@
             },
             "description": "Common macOS package settings"
         }
-{% endif %}
-{% if 'windows' in platforms and 'x64' in architectures and 'msvc' in windows_compilers %},
+{%- endif %}
+{%- if 'windows' in platforms and 'x64' in architectures and 'msvc' in windows_compilers %},
         {
-            "name": "windows-x64-msvc-vs2022-debug",
-            "displayName": "Windows x64 MSVC Visual Studio 2022 Debug",
-            "configurePreset": "windows-x64-msvc-vs2022",
+            "name": "windows-x64-msvc-vs-debug",
+            "displayName": "Windows x64 MSVC Visual Studio Debug",
+            "configurePreset": "windows-x64-msvc-vs",
             "configurations": [
                 "Debug"
             ],
             "inherits": [
                 "windows"
             ],
-            "description": "Package Windows x64 MSVC Visual Studio 2022 Debug"
+            "description": "Package Windows x64 MSVC Visual Studio Debug"
         }
-{% endif %}
-{% if 'windows' in platforms and 'x64' in architectures and 'msvc' in windows_compilers %},
+{%- endif %}
+{%- if 'windows' in platforms and 'x64' in architectures and 'msvc' in windows_compilers %},
         {
-            "name": "windows-x64-msvc-vs2022-release",
-            "displayName": "Windows x64 MSVC Visual Studio 2022 Release",
-            "configurePreset": "windows-x64-msvc-vs2022",
+            "name": "windows-x64-msvc-vs-release",
+            "displayName": "Windows x64 MSVC Visual Studio Release",
+            "configurePreset": "windows-x64-msvc-vs",
             "configurations": [
                 "Release"
             ],
             "inherits": [
                 "windows"
             ],
-            "description": "Package Windows x64 MSVC Visual Studio 2022 Release"
+            "description": "Package Windows x64 MSVC Visual Studio Release"
         }
-{% endif %}
-{% if 'windows' in platforms and 'x64' in architectures and 'clang-cl' in windows_compilers %},
+{%- endif %}
+{%- if 'windows' in platforms and 'x64' in architectures and 'clang-cl' in windows_compilers %},
         {
             "name": "windows-x64-clang-cl-ninja-debug",
             "displayName": "Windows x64 Clang-CL Ninja Debug",
@@ -1716,8 +1716,8 @@
             ],
             "description": "Package Windows x64 Clang-CL Ninja Debug"
         }
-{% endif %}
-{% if 'windows' in platforms and 'x64' in architectures and 'clang-cl' in windows_compilers %},
+{%- endif %}
+{%- if 'windows' in platforms and 'x64' in architectures and 'clang-cl' in windows_compilers %},
         {
             "name": "windows-x64-clang-cl-ninja-release",
             "displayName": "Windows x64 Clang-CL Ninja Release",
@@ -1727,8 +1727,8 @@
             ],
             "description": "Package Windows x64 Clang-CL Ninja Release"
         }
-{% endif %}
-{% if 'windows' in platforms and 'x64' in architectures and 'clang' in windows_compilers %},
+{%- endif %}
+{%- if 'windows' in platforms and 'x64' in architectures and 'clang' in windows_compilers %},
         {
             "name": "windows-x64-clang-ninja-debug",
             "displayName": "Windows x64 Clang Ninja Debug",
@@ -1738,8 +1738,8 @@
             ],
             "description": "Package Windows x64 Clang Ninja Debug"
         }
-{% endif %}
-{% if 'windows' in platforms and 'x64' in architectures and 'clang' in windows_compilers %},
+{%- endif %}
+{%- if 'windows' in platforms and 'x64' in architectures and 'clang' in windows_compilers %},
         {
             "name": "windows-x64-clang-ninja-release",
             "displayName": "Windows x64 Clang Ninja Release",
@@ -1749,36 +1749,36 @@
             ],
             "description": "Package Windows x64 Clang Ninja Release"
         }
-{% endif %}
-{% if 'windows' in platforms and 'arm64' in architectures and 'msvc' in windows_compilers %},
+{%- endif %}
+{%- if 'windows' in platforms and 'arm64' in architectures and 'msvc' in windows_compilers %},
         {
-            "name": "windows-arm64-msvc-vs2022-debug",
-            "displayName": "Windows ARM64 MSVC Visual Studio 2022 Debug",
-            "configurePreset": "windows-arm64-msvc-vs2022",
+            "name": "windows-arm64-msvc-vs-debug",
+            "displayName": "Windows ARM64 MSVC Visual Studio Debug",
+            "configurePreset": "windows-arm64-msvc-vs",
             "configurations": [
                 "Debug"
             ],
             "inherits": [
                 "windows"
             ],
-            "description": "Package Windows ARM64 MSVC Visual Studio 2022 Debug"
+            "description": "Package Windows ARM64 MSVC Visual Studio Debug"
         }
-{% endif %}
-{% if 'windows' in platforms and 'arm64' in architectures and 'msvc' in windows_compilers %},
+{%- endif %}
+{%- if 'windows' in platforms and 'arm64' in architectures and 'msvc' in windows_compilers %},
         {
-            "name": "windows-arm64-msvc-vs2022-release",
-            "displayName": "Windows ARM64 MSVC Visual Studio 2022 Release",
-            "configurePreset": "windows-arm64-msvc-vs2022",
+            "name": "windows-arm64-msvc-vs-release",
+            "displayName": "Windows ARM64 MSVC Visual Studio Release",
+            "configurePreset": "windows-arm64-msvc-vs",
             "configurations": [
                 "Release"
             ],
             "inherits": [
                 "windows"
             ],
-            "description": "Package Windows ARM64 MSVC Visual Studio 2022 Release"
+            "description": "Package Windows ARM64 MSVC Visual Studio Release"
         }
-{% endif %}
-{% if 'windows' in platforms and 'arm64' in architectures and 'clang-cl' in windows_compilers %},
+{%- endif %}
+{%- if 'windows' in platforms and 'arm64' in architectures and 'clang-cl' in windows_compilers %},
         {
             "name": "windows-arm64-clang-cl-ninja-debug",
             "displayName": "Windows ARM64 Clang-CL Ninja Debug",
@@ -1788,8 +1788,8 @@
             ],
             "description": "Package Windows ARM64 Clang-CL Ninja Debug"
         }
-{% endif %}
-{% if 'windows' in platforms and 'arm64' in architectures and 'clang-cl' in windows_compilers %},
+{%- endif %}
+{%- if 'windows' in platforms and 'arm64' in architectures and 'clang-cl' in windows_compilers %},
         {
             "name": "windows-arm64-clang-cl-ninja-release",
             "displayName": "Windows ARM64 Clang-CL Ninja Release",
@@ -1799,8 +1799,8 @@
             ],
             "description": "Package Windows ARM64 Clang-CL Ninja Release"
         }
-{% endif %}
-{% if 'windows' in platforms and 'arm64' in architectures and 'clang' in windows_compilers %},
+{%- endif %}
+{%- if 'windows' in platforms and 'arm64' in architectures and 'clang' in windows_compilers %},
         {
             "name": "windows-arm64-clang-ninja-debug",
             "displayName": "Windows ARM64 Clang Ninja Debug",
@@ -1810,8 +1810,8 @@
             ],
             "description": "Package Windows ARM64 Clang Ninja Debug"
         }
-{% endif %}
-{% if 'windows' in platforms and 'arm64' in architectures and 'clang' in windows_compilers %},
+{%- endif %}
+{%- if 'windows' in platforms and 'arm64' in architectures and 'clang' in windows_compilers %},
         {
             "name": "windows-arm64-clang-ninja-release",
             "displayName": "Windows ARM64 Clang Ninja Release",
@@ -1821,8 +1821,8 @@
             ],
             "description": "Package Windows ARM64 Clang Ninja Release"
         }
-{% endif %}
-{% if 'linux' in platforms and 'x64' in architectures and 'gcc' in linux_compilers and 'ninja' in linux_generators %},
+{%- endif %}
+{%- if 'linux' in platforms and 'x64' in architectures and 'gcc' in linux_compilers and 'ninja' in linux_generators %},
         {
             "name": "linux-x64-gcc-ninja-debug",
             "displayName": "Linux x64 GCC Ninja Debug",
@@ -1832,8 +1832,8 @@
             ],
             "description": "Package Linux x64 GCC Ninja Debug"
         }
-{% endif %}
-{% if 'linux' in platforms and 'x64' in architectures and 'gcc' in linux_compilers and 'ninja' in linux_generators %},
+{%- endif %}
+{%- if 'linux' in platforms and 'x64' in architectures and 'gcc' in linux_compilers and 'ninja' in linux_generators %},
         {
             "name": "linux-x64-gcc-ninja-release",
             "displayName": "Linux x64 GCC Ninja Release",
@@ -1843,8 +1843,8 @@
             ],
             "description": "Package Linux x64 GCC Ninja Release"
         }
-{% endif %}
-{% if 'linux' in platforms and 'x64' in architectures and 'gcc' in linux_compilers and 'make' in linux_generators %},
+{%- endif %}
+{%- if 'linux' in platforms and 'x64' in architectures and 'gcc' in linux_compilers and 'make' in linux_generators %},
         {
             "name": "linux-x64-gcc-make-debug",
             "displayName": "Linux x64 GCC Unix Makefiles Debug",
@@ -1854,8 +1854,8 @@
             ],
             "description": "Package Linux x64 GCC Unix Makefiles Debug"
         }
-{% endif %}
-{% if 'linux' in platforms and 'x64' in architectures and 'gcc' in linux_compilers and 'make' in linux_generators %},
+{%- endif %}
+{%- if 'linux' in platforms and 'x64' in architectures and 'gcc' in linux_compilers and 'make' in linux_generators %},
         {
             "name": "linux-x64-gcc-make-release",
             "displayName": "Linux x64 GCC Unix Makefiles Release",
@@ -1865,8 +1865,8 @@
             ],
             "description": "Package Linux x64 GCC Unix Makefiles Release"
         }
-{% endif %}
-{% if 'linux' in platforms and 'x64' in architectures and 'clang' in linux_compilers and 'ninja' in linux_generators %},
+{%- endif %}
+{%- if 'linux' in platforms and 'x64' in architectures and 'clang' in linux_compilers and 'ninja' in linux_generators %},
         {
             "name": "linux-x64-clang-ninja-debug",
             "displayName": "Linux x64 Clang Ninja Debug",
@@ -1876,8 +1876,8 @@
             ],
             "description": "Package Linux x64 Clang Ninja Debug"
         }
-{% endif %}
-{% if 'linux' in platforms and 'x64' in architectures and 'clang' in linux_compilers and 'ninja' in linux_generators %},
+{%- endif %}
+{%- if 'linux' in platforms and 'x64' in architectures and 'clang' in linux_compilers and 'ninja' in linux_generators %},
         {
             "name": "linux-x64-clang-ninja-release",
             "displayName": "Linux x64 Clang Ninja Release",
@@ -1887,8 +1887,8 @@
             ],
             "description": "Package Linux x64 Clang Ninja Release"
         }
-{% endif %}
-{% if 'linux' in platforms and 'x64' in architectures and 'clang' in linux_compilers and 'make' in linux_generators %},
+{%- endif %}
+{%- if 'linux' in platforms and 'x64' in architectures and 'clang' in linux_compilers and 'make' in linux_generators %},
         {
             "name": "linux-x64-clang-make-debug",
             "displayName": "Linux x64 Clang Unix Makefiles Debug",
@@ -1898,8 +1898,8 @@
             ],
             "description": "Package Linux x64 Clang Unix Makefiles Debug"
         }
-{% endif %}
-{% if 'linux' in platforms and 'x64' in architectures and 'clang' in linux_compilers and 'make' in linux_generators %},
+{%- endif %}
+{%- if 'linux' in platforms and 'x64' in architectures and 'clang' in linux_compilers and 'make' in linux_generators %},
         {
             "name": "linux-x64-clang-make-release",
             "displayName": "Linux x64 Clang Unix Makefiles Release",
@@ -1909,8 +1909,8 @@
             ],
             "description": "Package Linux x64 Clang Unix Makefiles Release"
         }
-{% endif %}
-{% if 'linux' in platforms and 'arm64' in architectures and 'gcc' in linux_compilers and 'ninja' in linux_generators %},
+{%- endif %}
+{%- if 'linux' in platforms and 'arm64' in architectures and 'gcc' in linux_compilers and 'ninja' in linux_generators %},
         {
             "name": "linux-arm64-gcc-ninja-debug",
             "displayName": "Linux ARM64 GCC Ninja Debug",
@@ -1920,8 +1920,8 @@
             ],
             "description": "Package Linux ARM64 GCC Ninja Debug"
         }
-{% endif %}
-{% if 'linux' in platforms and 'arm64' in architectures and 'gcc' in linux_compilers and 'ninja' in linux_generators %},
+{%- endif %}
+{%- if 'linux' in platforms and 'arm64' in architectures and 'gcc' in linux_compilers and 'ninja' in linux_generators %},
         {
             "name": "linux-arm64-gcc-ninja-release",
             "displayName": "Linux ARM64 GCC Ninja Release",
@@ -1931,8 +1931,8 @@
             ],
             "description": "Package Linux ARM64 GCC Ninja Release"
         }
-{% endif %}
-{% if 'linux' in platforms and 'arm64' in architectures and 'gcc' in linux_compilers and 'make' in linux_generators %},
+{%- endif %}
+{%- if 'linux' in platforms and 'arm64' in architectures and 'gcc' in linux_compilers and 'make' in linux_generators %},
         {
             "name": "linux-arm64-gcc-make-debug",
             "displayName": "Linux ARM64 GCC Unix Makefiles Debug",
@@ -1942,8 +1942,8 @@
             ],
             "description": "Package Linux ARM64 GCC Unix Makefiles Debug"
         }
-{% endif %}
-{% if 'linux' in platforms and 'arm64' in architectures and 'gcc' in linux_compilers and 'make' in linux_generators %},
+{%- endif %}
+{%- if 'linux' in platforms and 'arm64' in architectures and 'gcc' in linux_compilers and 'make' in linux_generators %},
         {
             "name": "linux-arm64-gcc-make-release",
             "displayName": "Linux ARM64 GCC Unix Makefiles Release",
@@ -1953,8 +1953,8 @@
             ],
             "description": "Package Linux ARM64 GCC Unix Makefiles Release"
         }
-{% endif %}
-{% if 'linux' in platforms and 'arm64' in architectures and 'clang' in linux_compilers and 'ninja' in linux_generators %},
+{%- endif %}
+{%- if 'linux' in platforms and 'arm64' in architectures and 'clang' in linux_compilers and 'ninja' in linux_generators %},
         {
             "name": "linux-arm64-clang-ninja-debug",
             "displayName": "Linux ARM64 Clang Ninja Debug",
@@ -1964,8 +1964,8 @@
             ],
             "description": "Package Linux ARM64 Clang Ninja Debug"
         }
-{% endif %}
-{% if 'linux' in platforms and 'arm64' in architectures and 'clang' in linux_compilers and 'ninja' in linux_generators %},
+{%- endif %}
+{%- if 'linux' in platforms and 'arm64' in architectures and 'clang' in linux_compilers and 'ninja' in linux_generators %},
         {
             "name": "linux-arm64-clang-ninja-release",
             "displayName": "Linux ARM64 Clang Ninja Release",
@@ -1975,8 +1975,8 @@
             ],
             "description": "Package Linux ARM64 Clang Ninja Release"
         }
-{% endif %}
-{% if 'linux' in platforms and 'arm64' in architectures and 'clang' in linux_compilers and 'make' in linux_generators %},
+{%- endif %}
+{%- if 'linux' in platforms and 'arm64' in architectures and 'clang' in linux_compilers and 'make' in linux_generators %},
         {
             "name": "linux-arm64-clang-make-debug",
             "displayName": "Linux ARM64 Clang Unix Makefiles Debug",
@@ -1986,8 +1986,8 @@
             ],
             "description": "Package Linux ARM64 Clang Unix Makefiles Debug"
         }
-{% endif %}
-{% if 'linux' in platforms and 'arm64' in architectures and 'clang' in linux_compilers and 'make' in linux_generators %},
+{%- endif %}
+{%- if 'linux' in platforms and 'arm64' in architectures and 'clang' in linux_compilers and 'make' in linux_generators %},
         {
             "name": "linux-arm64-clang-make-release",
             "displayName": "Linux ARM64 Clang Unix Makefiles Release",
@@ -1997,8 +1997,8 @@
             ],
             "description": "Package Linux ARM64 Clang Unix Makefiles Release"
         }
-{% endif %}
-{% if 'macos' in platforms and 'x64' in architectures and 'clang' in macos_compilers and 'ninja' in macos_generators %},
+{%- endif %}
+{%- if 'macos' in platforms and 'x64' in architectures and 'clang' in macos_compilers and 'ninja' in macos_generators %},
         {
             "name": "macos-x64-clang-ninja-debug",
             "displayName": "macOS x64 Clang Ninja Debug",
@@ -2008,8 +2008,8 @@
             ],
             "description": "Package macOS x64 Clang Ninja Debug"
         }
-{% endif %}
-{% if 'macos' in platforms and 'x64' in architectures and 'clang' in macos_compilers and 'ninja' in macos_generators %},
+{%- endif %}
+{%- if 'macos' in platforms and 'x64' in architectures and 'clang' in macos_compilers and 'ninja' in macos_generators %},
         {
             "name": "macos-x64-clang-ninja-release",
             "displayName": "macOS x64 Clang Ninja Release",
@@ -2019,8 +2019,8 @@
             ],
             "description": "Package macOS x64 Clang Ninja Release"
         }
-{% endif %}
-{% if 'macos' in platforms and 'x64' in architectures and 'clang' in macos_compilers and 'xcode' in macos_generators %},
+{%- endif %}
+{%- if 'macos' in platforms and 'x64' in architectures and 'clang' in macos_compilers and 'xcode' in macos_generators %},
         {
             "name": "macos-x64-clang-xcode-debug",
             "displayName": "macOS x64 Clang Xcode Debug",
@@ -2033,8 +2033,8 @@
             ],
             "description": "Package macOS x64 Clang Xcode Debug"
         }
-{% endif %}
-{% if 'macos' in platforms and 'x64' in architectures and 'clang' in macos_compilers and 'xcode' in macos_generators %},
+{%- endif %}
+{%- if 'macos' in platforms and 'x64' in architectures and 'clang' in macos_compilers and 'xcode' in macos_generators %},
         {
             "name": "macos-x64-clang-xcode-release",
             "displayName": "macOS x64 Clang Xcode Release",
@@ -2047,8 +2047,8 @@
             ],
             "description": "Package macOS x64 Clang Xcode Release"
         }
-{% endif %}
-{% if 'macos' in platforms and 'arm64' in architectures and 'clang' in macos_compilers and 'ninja' in macos_generators %},
+{%- endif %}
+{%- if 'macos' in platforms and 'arm64' in architectures and 'clang' in macos_compilers and 'ninja' in macos_generators %},
         {
             "name": "macos-arm64-clang-ninja-debug",
             "displayName": "macOS ARM64 Clang Ninja Debug",
@@ -2058,8 +2058,8 @@
             ],
             "description": "Package macOS ARM64 Clang Ninja Debug"
         }
-{% endif %}
-{% if 'macos' in platforms and 'arm64' in architectures and 'clang' in macos_compilers and 'ninja' in macos_generators %},
+{%- endif %}
+{%- if 'macos' in platforms and 'arm64' in architectures and 'clang' in macos_compilers and 'ninja' in macos_generators %},
         {
             "name": "macos-arm64-clang-ninja-release",
             "displayName": "macOS ARM64 Clang Ninja Release",
@@ -2069,8 +2069,8 @@
             ],
             "description": "Package macOS ARM64 Clang Ninja Release"
         }
-{% endif %}
-{% if 'macos' in platforms and 'arm64' in architectures and 'clang' in macos_compilers and 'xcode' in macos_generators %},
+{%- endif %}
+{%- if 'macos' in platforms and 'arm64' in architectures and 'clang' in macos_compilers and 'xcode' in macos_generators %},
         {
             "name": "macos-arm64-clang-xcode-debug",
             "displayName": "macOS ARM64 Clang Xcode Debug",
@@ -2083,8 +2083,8 @@
             ],
             "description": "Package macOS ARM64 Clang Xcode Debug"
         }
-{% endif %}
-{% if 'macos' in platforms and 'arm64' in architectures and 'clang' in macos_compilers and 'xcode' in macos_generators %},
+{%- endif %}
+{%- if 'macos' in platforms and 'arm64' in architectures and 'clang' in macos_compilers and 'xcode' in macos_generators %},
         {
             "name": "macos-arm64-clang-xcode-release",
             "displayName": "macOS ARM64 Clang Xcode Release",
@@ -2097,7 +2097,7 @@
             ],
             "description": "Package macOS ARM64 Clang Xcode Release"
         }
-{% endif %}
+{%- endif %}
     ],
     "workflowPresets": [
         {
@@ -2109,57 +2109,57 @@
                 }
             ]
         }
-{% if 'windows' in platforms and 'x64' in architectures and 'msvc' in windows_compilers %},
+{%- if 'windows' in platforms and 'x64' in architectures and 'msvc' in windows_compilers %},
         {
-            "name": "windows-x64-msvc-vs2022-debug",
-            "displayName": "Windows x64 MSVC Visual Studio 2022 Debug",
+            "name": "windows-x64-msvc-vs-debug",
+            "displayName": "Windows x64 MSVC Visual Studio Debug",
             "steps": [
                 {
                     "type": "configure",
-                    "name": "windows-x64-msvc-vs2022"
+                    "name": "windows-x64-msvc-vs"
                 },
                 {
                     "type": "build",
-                    "name": "windows-x64-msvc-vs2022-debug"
+                    "name": "windows-x64-msvc-vs-debug"
                 },
                 {
                     "type": "test",
-                    "name": "windows-x64-msvc-vs2022-debug"
+                    "name": "windows-x64-msvc-vs-debug"
                 },
                 {
                     "type": "package",
-                    "name": "windows-x64-msvc-vs2022-debug"
+                    "name": "windows-x64-msvc-vs-debug"
                 }
             ],
-            "description": "Configure, build, test, and package Windows x64 MSVC Visual Studio 2022 Debug"
+            "description": "Configure, build, test, and package Windows x64 MSVC Visual Studio Debug"
         }
-{% endif %}
-{% if 'windows' in platforms and 'x64' in architectures and 'msvc' in windows_compilers %},
+{%- endif %}
+{%- if 'windows' in platforms and 'x64' in architectures and 'msvc' in windows_compilers %},
         {
-            "name": "windows-x64-msvc-vs2022-release",
-            "displayName": "Windows x64 MSVC Visual Studio 2022 Release",
+            "name": "windows-x64-msvc-vs-release",
+            "displayName": "Windows x64 MSVC Visual Studio Release",
             "steps": [
                 {
                     "type": "configure",
-                    "name": "windows-x64-msvc-vs2022"
+                    "name": "windows-x64-msvc-vs"
                 },
                 {
                     "type": "build",
-                    "name": "windows-x64-msvc-vs2022-release"
+                    "name": "windows-x64-msvc-vs-release"
                 },
                 {
                     "type": "test",
-                    "name": "windows-x64-msvc-vs2022-release"
+                    "name": "windows-x64-msvc-vs-release"
                 },
                 {
                     "type": "package",
-                    "name": "windows-x64-msvc-vs2022-release"
+                    "name": "windows-x64-msvc-vs-release"
                 }
             ],
-            "description": "Configure, build, test, and package Windows x64 MSVC Visual Studio 2022 Release"
+            "description": "Configure, build, test, and package Windows x64 MSVC Visual Studio Release"
         }
-{% endif %}
-{% if 'windows' in platforms and 'x64' in architectures and 'clang-cl' in windows_compilers %},
+{%- endif %}
+{%- if 'windows' in platforms and 'x64' in architectures and 'clang-cl' in windows_compilers %},
         {
             "name": "windows-x64-clang-cl-ninja-debug",
             "displayName": "Windows x64 Clang-CL Ninja Debug",
@@ -2183,8 +2183,8 @@
             ],
             "description": "Configure, build, test, and package Windows x64 Clang-CL Ninja Debug"
         }
-{% endif %}
-{% if 'windows' in platforms and 'x64' in architectures and 'clang-cl' in windows_compilers %},
+{%- endif %}
+{%- if 'windows' in platforms and 'x64' in architectures and 'clang-cl' in windows_compilers %},
         {
             "name": "windows-x64-clang-cl-ninja-release",
             "displayName": "Windows x64 Clang-CL Ninja Release",
@@ -2208,8 +2208,8 @@
             ],
             "description": "Configure, build, test, and package Windows x64 Clang-CL Ninja Release"
         }
-{% endif %}
-{% if 'windows' in platforms and 'x64' in architectures and 'clang' in windows_compilers %},
+{%- endif %}
+{%- if 'windows' in platforms and 'x64' in architectures and 'clang' in windows_compilers %},
         {
             "name": "windows-x64-clang-ninja-debug",
             "displayName": "Windows x64 Clang Ninja Debug",
@@ -2233,8 +2233,8 @@
             ],
             "description": "Configure, build, test, and package Windows x64 Clang Ninja Debug"
         }
-{% endif %}
-{% if 'windows' in platforms and 'x64' in architectures and 'clang' in windows_compilers %},
+{%- endif %}
+{%- if 'windows' in platforms and 'x64' in architectures and 'clang' in windows_compilers %},
         {
             "name": "windows-x64-clang-ninja-release",
             "displayName": "Windows x64 Clang Ninja Release",
@@ -2258,58 +2258,58 @@
             ],
             "description": "Configure, build, test, and package Windows x64 Clang Ninja Release"
         }
-{% endif %}
-{% if 'windows' in platforms and 'arm64' in architectures and 'msvc' in windows_compilers %},
+{%- endif %}
+{%- if 'windows' in platforms and 'arm64' in architectures and 'msvc' in windows_compilers %},
         {
-            "name": "windows-arm64-msvc-vs2022-debug",
-            "displayName": "Windows ARM64 MSVC Visual Studio 2022 Debug",
+            "name": "windows-arm64-msvc-vs-debug",
+            "displayName": "Windows ARM64 MSVC Visual Studio Debug",
             "steps": [
                 {
                     "type": "configure",
-                    "name": "windows-arm64-msvc-vs2022"
+                    "name": "windows-arm64-msvc-vs"
                 },
                 {
                     "type": "build",
-                    "name": "windows-arm64-msvc-vs2022-debug"
+                    "name": "windows-arm64-msvc-vs-debug"
                 },
                 {
                     "type": "test",
-                    "name": "windows-arm64-msvc-vs2022-debug"
+                    "name": "windows-arm64-msvc-vs-debug"
                 },
                 {
                     "type": "package",
-                    "name": "windows-arm64-msvc-vs2022-debug"
+                    "name": "windows-arm64-msvc-vs-debug"
                 }
             ],
-            "description": "Configure, build, test, and package Windows ARM64 MSVC Visual Studio 2022 Debug"
+            "description": "Configure, build, test, and package Windows ARM64 MSVC Visual Studio Debug"
         }
-{% endif %}
-{% if 'windows' in platforms and 'arm64' in architectures and 'msvc' in windows_compilers %},
+{%- endif %}
+{%- if 'windows' in platforms and 'arm64' in architectures and 'msvc' in windows_compilers %},
         {
-            "name": "windows-arm64-msvc-vs2022-release",
-            "displayName": "Windows ARM64 MSVC Visual Studio 2022 Release",
+            "name": "windows-arm64-msvc-vs-release",
+            "displayName": "Windows ARM64 MSVC Visual Studio Release",
             "steps": [
                 {
                     "type": "configure",
-                    "name": "windows-arm64-msvc-vs2022"
+                    "name": "windows-arm64-msvc-vs"
                 },
                 {
                     "type": "build",
-                    "name": "windows-arm64-msvc-vs2022-release"
+                    "name": "windows-arm64-msvc-vs-release"
                 },
                 {
                     "type": "test",
-                    "name": "windows-arm64-msvc-vs2022-release"
+                    "name": "windows-arm64-msvc-vs-release"
                 },
                 {
                     "type": "package",
-                    "name": "windows-arm64-msvc-vs2022-release"
+                    "name": "windows-arm64-msvc-vs-release"
                 }
             ],
-            "description": "Configure, build, test, and package Windows ARM64 MSVC Visual Studio 2022 Release"
+            "description": "Configure, build, test, and package Windows ARM64 MSVC Visual Studio Release"
         }
-{% endif %}
-{% if 'windows' in platforms and 'arm64' in architectures and 'clang-cl' in windows_compilers %},
+{%- endif %}
+{%- if 'windows' in platforms and 'arm64' in architectures and 'clang-cl' in windows_compilers %},
         {
             "name": "windows-arm64-clang-cl-ninja-debug",
             "displayName": "Windows ARM64 Clang-CL Ninja Debug",
@@ -2333,8 +2333,8 @@
             ],
             "description": "Configure, build, test, and package Windows ARM64 Clang-CL Ninja Debug"
         }
-{% endif %}
-{% if 'windows' in platforms and 'arm64' in architectures and 'clang-cl' in windows_compilers %},
+{%- endif %}
+{%- if 'windows' in platforms and 'arm64' in architectures and 'clang-cl' in windows_compilers %},
         {
             "name": "windows-arm64-clang-cl-ninja-release",
             "displayName": "Windows ARM64 Clang-CL Ninja Release",
@@ -2358,8 +2358,8 @@
             ],
             "description": "Configure, build, test, and package Windows ARM64 Clang-CL Ninja Release"
         }
-{% endif %}
-{% if 'windows' in platforms and 'arm64' in architectures and 'clang' in windows_compilers %},
+{%- endif %}
+{%- if 'windows' in platforms and 'arm64' in architectures and 'clang' in windows_compilers %},
         {
             "name": "windows-arm64-clang-ninja-debug",
             "displayName": "Windows ARM64 Clang Ninja Debug",
@@ -2383,8 +2383,8 @@
             ],
             "description": "Configure, build, test, and package Windows ARM64 Clang Ninja Debug"
         }
-{% endif %}
-{% if 'windows' in platforms and 'arm64' in architectures and 'clang' in windows_compilers %},
+{%- endif %}
+{%- if 'windows' in platforms and 'arm64' in architectures and 'clang' in windows_compilers %},
         {
             "name": "windows-arm64-clang-ninja-release",
             "displayName": "Windows ARM64 Clang Ninja Release",
@@ -2408,8 +2408,8 @@
             ],
             "description": "Configure, build, test, and package Windows ARM64 Clang Ninja Release"
         }
-{% endif %}
-{% if 'linux' in platforms and 'x64' in architectures and 'gcc' in linux_compilers and 'ninja' in linux_generators %},
+{%- endif %}
+{%- if 'linux' in platforms and 'x64' in architectures and 'gcc' in linux_compilers and 'ninja' in linux_generators %},
         {
             "name": "linux-x64-gcc-ninja-debug",
             "displayName": "Linux x64 GCC Ninja Debug",
@@ -2433,8 +2433,8 @@
             ],
             "description": "Configure, build, test, and package Linux x64 GCC Ninja Debug"
         }
-{% endif %}
-{% if 'linux' in platforms and 'x64' in architectures and 'gcc' in linux_compilers and 'ninja' in linux_generators %},
+{%- endif %}
+{%- if 'linux' in platforms and 'x64' in architectures and 'gcc' in linux_compilers and 'ninja' in linux_generators %},
         {
             "name": "linux-x64-gcc-ninja-release",
             "displayName": "Linux x64 GCC Ninja Release",
@@ -2458,8 +2458,8 @@
             ],
             "description": "Configure, build, test, and package Linux x64 GCC Ninja Release"
         }
-{% endif %}
-{% if 'linux' in platforms and 'x64' in architectures and 'gcc' in linux_compilers and 'make' in linux_generators %},
+{%- endif %}
+{%- if 'linux' in platforms and 'x64' in architectures and 'gcc' in linux_compilers and 'make' in linux_generators %},
         {
             "name": "linux-x64-gcc-make-debug",
             "displayName": "Linux x64 GCC Unix Makefiles Debug",
@@ -2483,8 +2483,8 @@
             ],
             "description": "Configure, build, test, and package Linux x64 GCC Unix Makefiles Debug"
         }
-{% endif %}
-{% if 'linux' in platforms and 'x64' in architectures and 'gcc' in linux_compilers and 'make' in linux_generators %},
+{%- endif %}
+{%- if 'linux' in platforms and 'x64' in architectures and 'gcc' in linux_compilers and 'make' in linux_generators %},
         {
             "name": "linux-x64-gcc-make-release",
             "displayName": "Linux x64 GCC Unix Makefiles Release",
@@ -2508,8 +2508,8 @@
             ],
             "description": "Configure, build, test, and package Linux x64 GCC Unix Makefiles Release"
         }
-{% endif %}
-{% if 'linux' in platforms and 'x64' in architectures and 'clang' in linux_compilers and 'ninja' in linux_generators %},
+{%- endif %}
+{%- if 'linux' in platforms and 'x64' in architectures and 'clang' in linux_compilers and 'ninja' in linux_generators %},
         {
             "name": "linux-x64-clang-ninja-debug",
             "displayName": "Linux x64 Clang Ninja Debug",
@@ -2533,8 +2533,8 @@
             ],
             "description": "Configure, build, test, and package Linux x64 Clang Ninja Debug"
         }
-{% endif %}
-{% if 'linux' in platforms and 'x64' in architectures and 'clang' in linux_compilers and 'ninja' in linux_generators %},
+{%- endif %}
+{%- if 'linux' in platforms and 'x64' in architectures and 'clang' in linux_compilers and 'ninja' in linux_generators %},
         {
             "name": "linux-x64-clang-ninja-release",
             "displayName": "Linux x64 Clang Ninja Release",
@@ -2558,8 +2558,8 @@
             ],
             "description": "Configure, build, test, and package Linux x64 Clang Ninja Release"
         }
-{% endif %}
-{% if 'linux' in platforms and 'x64' in architectures and 'clang' in linux_compilers and 'make' in linux_generators %},
+{%- endif %}
+{%- if 'linux' in platforms and 'x64' in architectures and 'clang' in linux_compilers and 'make' in linux_generators %},
         {
             "name": "linux-x64-clang-make-debug",
             "displayName": "Linux x64 Clang Unix Makefiles Debug",
@@ -2583,8 +2583,8 @@
             ],
             "description": "Configure, build, test, and package Linux x64 Clang Unix Makefiles Debug"
         }
-{% endif %}
-{% if 'linux' in platforms and 'x64' in architectures and 'clang' in linux_compilers and 'make' in linux_generators %},
+{%- endif %}
+{%- if 'linux' in platforms and 'x64' in architectures and 'clang' in linux_compilers and 'make' in linux_generators %},
         {
             "name": "linux-x64-clang-make-release",
             "displayName": "Linux x64 Clang Unix Makefiles Release",
@@ -2608,8 +2608,8 @@
             ],
             "description": "Configure, build, test, and package Linux x64 Clang Unix Makefiles Release"
         }
-{% endif %}
-{% if 'linux' in platforms and 'arm64' in architectures and 'gcc' in linux_compilers and 'ninja' in linux_generators %},
+{%- endif %}
+{%- if 'linux' in platforms and 'arm64' in architectures and 'gcc' in linux_compilers and 'ninja' in linux_generators %},
         {
             "name": "linux-arm64-gcc-ninja-debug",
             "displayName": "Linux ARM64 GCC Ninja Debug",
@@ -2633,8 +2633,8 @@
             ],
             "description": "Configure, build, test, and package Linux ARM64 GCC Ninja Debug"
         }
-{% endif %}
-{% if 'linux' in platforms and 'arm64' in architectures and 'gcc' in linux_compilers and 'ninja' in linux_generators %},
+{%- endif %}
+{%- if 'linux' in platforms and 'arm64' in architectures and 'gcc' in linux_compilers and 'ninja' in linux_generators %},
         {
             "name": "linux-arm64-gcc-ninja-release",
             "displayName": "Linux ARM64 GCC Ninja Release",
@@ -2658,8 +2658,8 @@
             ],
             "description": "Configure, build, test, and package Linux ARM64 GCC Ninja Release"
         }
-{% endif %}
-{% if 'linux' in platforms and 'arm64' in architectures and 'gcc' in linux_compilers and 'make' in linux_generators %},
+{%- endif %}
+{%- if 'linux' in platforms and 'arm64' in architectures and 'gcc' in linux_compilers and 'make' in linux_generators %},
         {
             "name": "linux-arm64-gcc-make-debug",
             "displayName": "Linux ARM64 GCC Unix Makefiles Debug",
@@ -2683,8 +2683,8 @@
             ],
             "description": "Configure, build, test, and package Linux ARM64 GCC Unix Makefiles Debug"
         }
-{% endif %}
-{% if 'linux' in platforms and 'arm64' in architectures and 'gcc' in linux_compilers and 'make' in linux_generators %},
+{%- endif %}
+{%- if 'linux' in platforms and 'arm64' in architectures and 'gcc' in linux_compilers and 'make' in linux_generators %},
         {
             "name": "linux-arm64-gcc-make-release",
             "displayName": "Linux ARM64 GCC Unix Makefiles Release",
@@ -2708,8 +2708,8 @@
             ],
             "description": "Configure, build, test, and package Linux ARM64 GCC Unix Makefiles Release"
         }
-{% endif %}
-{% if 'linux' in platforms and 'arm64' in architectures and 'clang' in linux_compilers and 'ninja' in linux_generators %},
+{%- endif %}
+{%- if 'linux' in platforms and 'arm64' in architectures and 'clang' in linux_compilers and 'ninja' in linux_generators %},
         {
             "name": "linux-arm64-clang-ninja-debug",
             "displayName": "Linux ARM64 Clang Ninja Debug",
@@ -2733,8 +2733,8 @@
             ],
             "description": "Configure, build, test, and package Linux ARM64 Clang Ninja Debug"
         }
-{% endif %}
-{% if 'linux' in platforms and 'arm64' in architectures and 'clang' in linux_compilers and 'ninja' in linux_generators %},
+{%- endif %}
+{%- if 'linux' in platforms and 'arm64' in architectures and 'clang' in linux_compilers and 'ninja' in linux_generators %},
         {
             "name": "linux-arm64-clang-ninja-release",
             "displayName": "Linux ARM64 Clang Ninja Release",
@@ -2758,8 +2758,8 @@
             ],
             "description": "Configure, build, test, and package Linux ARM64 Clang Ninja Release"
         }
-{% endif %}
-{% if 'linux' in platforms and 'arm64' in architectures and 'clang' in linux_compilers and 'make' in linux_generators %},
+{%- endif %}
+{%- if 'linux' in platforms and 'arm64' in architectures and 'clang' in linux_compilers and 'make' in linux_generators %},
         {
             "name": "linux-arm64-clang-make-debug",
             "displayName": "Linux ARM64 Clang Unix Makefiles Debug",
@@ -2783,8 +2783,8 @@
             ],
             "description": "Configure, build, test, and package Linux ARM64 Clang Unix Makefiles Debug"
         }
-{% endif %}
-{% if 'linux' in platforms and 'arm64' in architectures and 'clang' in linux_compilers and 'make' in linux_generators %},
+{%- endif %}
+{%- if 'linux' in platforms and 'arm64' in architectures and 'clang' in linux_compilers and 'make' in linux_generators %},
         {
             "name": "linux-arm64-clang-make-release",
             "displayName": "Linux ARM64 Clang Unix Makefiles Release",
@@ -2808,8 +2808,8 @@
             ],
             "description": "Configure, build, test, and package Linux ARM64 Clang Unix Makefiles Release"
         }
-{% endif %}
-{% if 'macos' in platforms and 'x64' in architectures and 'clang' in macos_compilers and 'ninja' in macos_generators %},
+{%- endif %}
+{%- if 'macos' in platforms and 'x64' in architectures and 'clang' in macos_compilers and 'ninja' in macos_generators %},
         {
             "name": "macos-x64-clang-ninja-debug",
             "displayName": "macOS x64 Clang Ninja Debug",
@@ -2833,8 +2833,8 @@
             ],
             "description": "Configure, build, test, and package macOS x64 Clang Ninja Debug"
         }
-{% endif %}
-{% if 'macos' in platforms and 'x64' in architectures and 'clang' in macos_compilers and 'ninja' in macos_generators %},
+{%- endif %}
+{%- if 'macos' in platforms and 'x64' in architectures and 'clang' in macos_compilers and 'ninja' in macos_generators %},
         {
             "name": "macos-x64-clang-ninja-release",
             "displayName": "macOS x64 Clang Ninja Release",
@@ -2858,8 +2858,8 @@
             ],
             "description": "Configure, build, test, and package macOS x64 Clang Ninja Release"
         }
-{% endif %}
-{% if 'macos' in platforms and 'x64' in architectures and 'clang' in macos_compilers and 'xcode' in macos_generators %},
+{%- endif %}
+{%- if 'macos' in platforms and 'x64' in architectures and 'clang' in macos_compilers and 'xcode' in macos_generators %},
         {
             "name": "macos-x64-clang-xcode-debug",
             "displayName": "macOS x64 Clang Xcode Debug",
@@ -2883,8 +2883,8 @@
             ],
             "description": "Configure, build, test, and package macOS x64 Clang Xcode Debug"
         }
-{% endif %}
-{% if 'macos' in platforms and 'x64' in architectures and 'clang' in macos_compilers and 'xcode' in macos_generators %},
+{%- endif %}
+{%- if 'macos' in platforms and 'x64' in architectures and 'clang' in macos_compilers and 'xcode' in macos_generators %},
         {
             "name": "macos-x64-clang-xcode-release",
             "displayName": "macOS x64 Clang Xcode Release",
@@ -2908,8 +2908,8 @@
             ],
             "description": "Configure, build, test, and package macOS x64 Clang Xcode Release"
         }
-{% endif %}
-{% if 'macos' in platforms and 'arm64' in architectures and 'clang' in macos_compilers and 'ninja' in macos_generators %},
+{%- endif %}
+{%- if 'macos' in platforms and 'arm64' in architectures and 'clang' in macos_compilers and 'ninja' in macos_generators %},
         {
             "name": "macos-arm64-clang-ninja-debug",
             "displayName": "macOS ARM64 Clang Ninja Debug",
@@ -2933,8 +2933,8 @@
             ],
             "description": "Configure, build, test, and package macOS ARM64 Clang Ninja Debug"
         }
-{% endif %}
-{% if 'macos' in platforms and 'arm64' in architectures and 'clang' in macos_compilers and 'ninja' in macos_generators %},
+{%- endif %}
+{%- if 'macos' in platforms and 'arm64' in architectures and 'clang' in macos_compilers and 'ninja' in macos_generators %},
         {
             "name": "macos-arm64-clang-ninja-release",
             "displayName": "macOS ARM64 Clang Ninja Release",
@@ -2958,8 +2958,8 @@
             ],
             "description": "Configure, build, test, and package macOS ARM64 Clang Ninja Release"
         }
-{% endif %}
-{% if 'macos' in platforms and 'arm64' in architectures and 'clang' in macos_compilers and 'xcode' in macos_generators %},
+{%- endif %}
+{%- if 'macos' in platforms and 'arm64' in architectures and 'clang' in macos_compilers and 'xcode' in macos_generators %},
         {
             "name": "macos-arm64-clang-xcode-debug",
             "displayName": "macOS ARM64 Clang Xcode Debug",
@@ -2983,8 +2983,8 @@
             ],
             "description": "Configure, build, test, and package macOS ARM64 Clang Xcode Debug"
         }
-{% endif %}
-{% if 'macos' in platforms and 'arm64' in architectures and 'clang' in macos_compilers and 'xcode' in macos_generators %},
+{%- endif %}
+{%- if 'macos' in platforms and 'arm64' in architectures and 'clang' in macos_compilers and 'xcode' in macos_generators %},
         {
             "name": "macos-arm64-clang-xcode-release",
             "displayName": "macOS ARM64 Clang Xcode Release",
@@ -3008,6 +3008,6 @@
             ],
             "description": "Configure, build, test, and package macOS ARM64 Clang Xcode Release"
         }
-{% endif %}
+{%- endif %}
     ]
 }

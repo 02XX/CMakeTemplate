@@ -7,7 +7,9 @@ from collections.abc import Mapping
 from pathlib import Path
 
 import pytest
+import yaml
 from copier import run_copy
+from jinja2 import Environment
 
 REPO = Path(__file__).resolve().parents[1]
 
@@ -41,6 +43,40 @@ def configure_preset_names(root: Path) -> set[str]:
 def assert_no_blank_lines(path: Path) -> None:
     blanks = [i for i, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1) if line.strip() == ""]
     assert not blanks, f"{path} has blank lines: {blanks}"
+
+
+@pytest.mark.parametrize("generator", [
+    "Visual Studio 16 2019", "Visual Studio 17 2022", "Visual Studio 18 2026",
+])
+def test_selected_visual_studio_generator(tmp_path: Path, generator: str) -> None:
+    dst = generate(tmp_path / "MEngine", {
+        "project_name": "MEngine", "platforms": ["windows"],
+        "architectures": ["x64", "arm64"], "windows_compilers": ["msvc"],
+        "windows_vs_generator": generator, "use_vcpkg": False,
+    })
+    presets = json.loads((dst / "CMakePresets.json").read_text(encoding="utf-8"))
+    msvc = [p for p in presets["configurePresets"] if p["name"].endswith("msvc-vs")]
+    assert len(msvc) == 2
+    assert all(p["generator"] == generator for p in msvc)
+    expected = (4, 2) if generator.endswith("2026") else (3, 31)
+    minimum = presets["cmakeMinimumRequired"]
+    assert (minimum["major"], minimum["minor"]) == expected
+    assert_no_blank_lines(dst / "CMakePresets.json")
+
+
+@pytest.mark.parametrize("platforms,compilers,expected", [
+    (["windows"], ["msvc"], "True"),
+    (["windows"], ["msvc", "clang"], "True"),
+    (["windows"], ["clang", "clang-cl"], "False"),
+    (["linux"], ["msvc"], "False"),
+])
+def test_visual_studio_question_condition(platforms, compilers, expected) -> None:
+    config = yaml.safe_load((REPO / "copier.yml").read_text(encoding="utf-8"))
+    question = config["windows_vs_generator"]
+    assert list(config).index("windows_vs_generator") > list(config).index("windows_compilers")
+    assert Environment().from_string(question["when"]).render(
+        platforms=platforms, windows_compilers=compilers,
+    ) == expected
 
 
 def test_default_layout(tmp_path: Path) -> None:
@@ -82,7 +118,7 @@ def test_default_layout(tmp_path: Path) -> None:
     assert user_presets["version"] == presets["version"]
     names = {p["name"] for p in presets["configurePresets"]}
     assert "vcpkg" in names
-    assert "windows-x64-msvc-vs2022" in names
+    assert "windows-x64-msvc-vs" in names
     assert "linux-x64-gcc-ninja-debug" in names
     assert "macos-arm64-clang-ninja-debug" in names
 
@@ -123,7 +159,7 @@ def test_multi_module_without_optional_bits(tmp_path: Path) -> None:
     presets = json.loads((dst / "CMakePresets.json").read_text(encoding="utf-8"))
     names = {p["name"] for p in presets["configurePresets"]}
     assert "vcpkg" not in names
-    assert "windows-x64-msvc-vs2022" in names
+    assert "windows-x64-msvc-vs" in names
 
     for path in cmake_lists(dst):
         assert_no_blank_lines(path)
@@ -146,12 +182,12 @@ def test_windows_x64_msvc_only(tmp_path: Path) -> None:
     assert "base" in names
     assert "vcpkg" in names
     assert "windows" in names
-    assert "windows-x64-msvc-vs2022" in names
+    assert "windows-x64-msvc-vs" in names
     assert not any(n.startswith("linux") or n.startswith("macos") for n in names)
     assert not any("clang" in n or "arm64" in n for n in names)
 
     ci = (dst / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
-    assert "windows-x64-msvc-vs2022-debug" in ci
+    assert "windows-x64-msvc-vs-debug" in ci
     assert "ubuntu-latest" not in ci
     assert "macos-latest" not in ci
     assert "lukka/run-vcpkg@v11" in ci
@@ -159,13 +195,13 @@ def test_windows_x64_msvc_only(tmp_path: Path) -> None:
     assert "workflowPreset" in ci
 
     cd = (dst / ".github" / "workflows" / "cd.yml").read_text(encoding="utf-8")
-    assert "windows-x64-msvc-vs2022-release" in cd
+    assert "windows-x64-msvc-vs-release" in cd
     assert "workflowPreset" in cd
     assert "lukka/run-vcpkg@v11" in cd
     assert "lukka/run-cmake@v10.9" in cd
 
     readme = (dst / "README.md").read_text(encoding="utf-8")
-    assert "windows-x64-msvc-vs2022-debug" in readme
+    assert "windows-x64-msvc-vs-debug" in readme
     assert "linux-" not in readme
     assert "macos-" not in readme
 
@@ -218,11 +254,11 @@ def test_windows_arm64_clang_ci_uses_substitute_preset(tmp_path: Path) -> None:
 
     names = configure_preset_names(dst)
     assert "windows-arm64-clang-ninja-debug" in names
-    assert "windows-x64-msvc-vs2022" not in names
+    assert "windows-x64-msvc-vs" not in names
 
     ci = (dst / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
     assert "windows-arm64-clang-ninja-debug" in ci
-    assert "windows-x64-msvc-vs2022-debug" not in ci
+    assert "windows-x64-msvc-vs-debug" not in ci
 
 
 def test_gpl_license(tmp_path: Path) -> None:
@@ -243,7 +279,7 @@ def test_cmake_list_presets(tmp_path: Path) -> None:
         text=True,
     )
     assert result.returncode == 0, result.stderr
-    assert "windows-x64-msvc-vs2022" in result.stdout
+    assert "windows-x64-msvc-vs" in result.stdout
 
 
 @pytest.mark.skipif(shutil.which("cmake") is None, reason="cmake not on PATH")
@@ -266,4 +302,4 @@ def test_cmake_list_presets_windows_only(tmp_path: Path) -> None:
         text=True,
     )
     assert result.returncode == 0, result.stderr
-    assert "windows-x64-msvc-vs2022" in result.stdout
+    assert "windows-x64-msvc-vs" in result.stdout
