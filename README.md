@@ -23,7 +23,7 @@
 - 若启用 vcpkg：安装 [vcpkg](https://vcpkg.io/) 并设置 `VCPKG_ROOT`
 
 ```bash
-uvx copier copy --trust --vcs-ref HEAD ./CMakeTemplate ../MyApp
+uvx copier copy --trust --vcs-ref HEAD https://github.com/02XX/CMakeTemplate.git ./MyApp
 ```
 
 `--trust` 才会跑 `_tasks`。启用 vcpkg 时任务用 `VCPKG_ROOT` 找可执行文件（不要求在 PATH 里），自动 `vcpkg new`，测试开启则再 `vcpkg add port gtest`。
