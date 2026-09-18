@@ -58,25 +58,63 @@ def test_selected_visual_studio_generator(tmp_path: Path, generator: str) -> Non
     msvc = [p for p in presets["configurePresets"] if p["name"].endswith("msvc-vs")]
     assert len(msvc) == 2
     assert all(p["generator"] == generator for p in msvc)
+    assert all("toolset" not in p for p in msvc)
     expected = (4, 2) if generator.endswith("2026") else (3, 31)
     minimum = presets["cmakeMinimumRequired"]
     assert (minimum["major"], minimum["minor"]) == expected
     assert_no_blank_lines(dst / "CMakePresets.json")
 
 
+@pytest.mark.parametrize("question_name", ["windows_vs_generator", "windows_msvc_toolset"])
 @pytest.mark.parametrize("platforms,compilers,expected", [
     (["windows"], ["msvc"], "True"),
     (["windows"], ["msvc", "clang"], "True"),
     (["windows"], ["clang", "clang-cl"], "False"),
     (["linux"], ["msvc"], "False"),
 ])
-def test_visual_studio_question_condition(platforms, compilers, expected) -> None:
+def test_visual_studio_question_condition(question_name, platforms, compilers, expected) -> None:
     config = yaml.safe_load((REPO / "copier.yml").read_text(encoding="utf-8"))
-    question = config["windows_vs_generator"]
-    assert list(config).index("windows_vs_generator") > list(config).index("windows_compilers")
+    question = config[question_name]
+    assert list(config).index(question_name) > list(config).index("windows_compilers")
+    if question_name == "windows_msvc_toolset":
+        assert list(config).index(question_name) > list(config).index("windows_vs_generator")
     assert Environment().from_string(question["when"]).render(
         platforms=platforms, windows_compilers=compilers,
     ) == expected
+
+
+@pytest.mark.parametrize("generator,toolset", [
+    ("Visual Studio 16 2019", "v142"),
+    ("Visual Studio 17 2022", "v142"),
+    ("Visual Studio 17 2022", "v143"),
+    ("Visual Studio 18 2026", "v145"),
+])
+def test_selected_msvc_toolset(tmp_path: Path, generator: str, toolset: str) -> None:
+    dst = generate(tmp_path / "MEngine", {
+        "project_name": "MEngine", "platforms": ["windows"],
+        "architectures": ["x64", "arm64"], "windows_compilers": ["msvc", "clang-cl"],
+        "windows_vs_generator": generator, "windows_msvc_toolset": toolset,
+        "use_vcpkg": False,
+    })
+    presets = json.loads((dst / "CMakePresets.json").read_text(encoding="utf-8"))
+    msvc = [p for p in presets["configurePresets"] if p["name"].endswith("msvc-vs")]
+    assert len(msvc) == 2
+    assert all(p["toolset"] == toolset and p["generator"] == generator for p in msvc)
+    assert all("toolset" not in p for p in presets["configurePresets"] if "clang-cl" in p["name"])
+    assert_no_blank_lines(dst / "CMakePresets.json")
+
+
+@pytest.mark.parametrize("generator,toolset", [
+    ("Visual Studio 16 2019", "v143"),
+    ("Visual Studio 17 2022", "v145"),
+])
+def test_incompatible_msvc_toolset(tmp_path: Path, generator: str, toolset: str) -> None:
+    with pytest.raises(ValueError, match="工具集"):
+        generate(tmp_path / "MEngine", {
+            "project_name": "MEngine", "platforms": ["windows"], "windows_compilers": ["msvc"],
+            "windows_vs_generator": generator, "windows_msvc_toolset": toolset,
+            "use_vcpkg": False,
+        })
 
 
 def test_default_layout(tmp_path: Path) -> None:

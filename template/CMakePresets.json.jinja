@@ -84,6 +84,9 @@
                 "windows"
             ],
             "generator": "{{ windows_vs_generator }}",
+{%- if windows_msvc_toolset != 'default' %}
+            "toolset": "{{ windows_msvc_toolset }}",
+{%- endif %}
             "architecture": {
                 "value": "x64",
                 "strategy": "set"
@@ -187,6 +190,9 @@
                 "windows"
             ],
             "generator": "{{ windows_vs_generator }}",
+{%- if windows_msvc_toolset != 'default' %}
+            "toolset": "{{ windows_msvc_toolset }}",
+{%- endif %}
             "architecture": {
                 "value": "arm64",
                 "strategy": "set"

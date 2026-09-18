@@ -5,7 +5,7 @@
 生成出的项目自带：
 
 - CMake 3.31+（选择 VS2026 时需 4.2+） 与 `CMakePresets.json`
-- Copier 问卷：目标系统、架构、编译器，以及 Linux/macOS 生成器（Windows 选择 MSVC 后才询问 Visual Studio 版本（2019/2022/2026，默认 2022）：MSVC → Visual Studio，Clang / clang-cl → Ninja）。默认全选，生成当前全套 toolchain 与 preset；只选子集则只生成对应文件、preset 和 CI/CD job。macOS 也会询问编译器（目前仅 Clang）
+- Copier 问卷：目标系统、架构、编译器，以及 Linux/macOS 生成器（Windows 选择 MSVC 后才询问 Visual Studio 版本（2019/2022/2026，默认 2022）及 MSVC 工具集（默认/v142/v143/v145）：MSVC → Visual Studio，Clang / clang-cl → Ninja）。默认全选，生成当前全套 toolchain 与 preset；只选子集则只生成对应文件、preset 和 CI/CD job。macOS 也会询问编译器（目前仅 Clang）
 - 按所选组合拆分的 toolchain 文件
 - 可选 vcpkg（Presets/CI 接 toolchain；`vcpkg.json` 由 `--trust` 后的 `_tasks` 通过 `VCPKG_ROOT` 调用 `vcpkg new` 创建）
 - clang-format / clang-tidy

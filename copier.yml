@@ -219,6 +219,23 @@ windows_vs_generator:
     Visual Studio 2026 (CMake 4.2+): Visual Studio 18 2026
   default: Visual Studio 17 2022
 
+windows_msvc_toolset:
+  type: str
+  help: MSVC 工具集（所选 Visual Studio 中需已安装该工具集及目标架构组件）
+  when: "{{ 'windows' in platforms and 'msvc' in windows_compilers }}"
+  choices:
+    使用 Visual Studio 默认工具集: default
+    MSVC v142: v142
+    MSVC v143: v143
+    MSVC v145: v145
+  default: default
+  validator: >-
+    {% if windows_vs_generator == 'Visual Studio 16 2019' and windows_msvc_toolset in ['v143', 'v145'] %}
+    VS2019 不支持所选工具集，请选择默认工具集或 v142。
+    {% elif windows_vs_generator == 'Visual Studio 17 2022' and windows_msvc_toolset == 'v145' %}
+    v145 工具集需要 VS2026，请更换 Visual Studio 版本或工具集。
+    {% endif %}
+
 linux_compilers:
   type: str
   help: Linux 编译器
